@@ -141,7 +141,11 @@ export default function App() {
       return;
     }
 
-    const porsiDiberikan = Number(feedAmountInput);
+    const mainFoodItem = foodItems.find(i => i.type === 'food' || !i.type);
+    if (mainFoodItem && mainFoodItem.qty < porsiDiberikan) {
+      alert(`Stok tidak cukup! Sisa ${mainFoodItem.name} tinggal ${mainFoodItem.qty} ${mainFoodItem.unit}, tidak bisa kasih ${porsiDiberikan} porsi.`);
+      return;
+    }
 
     playCuteSound();
     setShowAnimation(true);
@@ -152,13 +156,12 @@ export default function App() {
 
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
-        // Otomatis kurangi stok makanan item pertama yang bertipe 'food'
         let remainingToSubtract = porsiDiberikan;
         const updatedFoodList = (p.foodList || []).map(item => {
           if ((item.type === 'food' || !item.type) && remainingToSubtract > 0) {
             const take = Math.min(item.qty, remainingToSubtract);
             remainingToSubtract -= take;
-            return { ...item, qty: Math.max(0, item.qty - take) };
+            return { ...item, qty: item.qty - take };
           }
           return item;
         });
