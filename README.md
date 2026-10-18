@@ -1,6 +1,6 @@
 # 🐾 PawRoutine
 
-> *"A Progressive Web App (PWA) built to solve my own daily struggles in taking care of exotic pets (Musang) and other lovely anabuls—managing feeding routines, fish oil vitamins, stock tracking, and health milestones without the hassle of forgetting!"*
+> *"A Progressive Web App (PWA) built to solve my own daily struggles in taking care of exotic pets and lovely anabuls—managing feeding routines, vitamin schedules, inventory stock tracking, and health milestones without the hassle of forgetting!"*
 
 [![React](https://img.shields.io/badge/React.js-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
@@ -11,24 +11,24 @@
 
 ## 💡 The Story / Latar Belakang
 
-Pernah nggak sih, melihara peliharaan (kayak musang kesayangan) tapi malah **lupa kapan terakhir kali dikasih makan** di siang hari karena mereka hobi banget tidur, atau pas sore-sore sadar kalau **stok pisang di rumah udah habis**, belum lagi lupa kapan jadwal minum obat cacing dan minyak ikan terakhir kali? 
+Pernah nggak sih, melihara peliharaan kesayangan tapi malah **lupa kapan terakhir kali dikasih makan** di siang hari, pas sore-sore sadar kalau **stok makanan di rumah udah habis**, belum lagi lupa kapan jadwal minum vitamin dan obat cacing terakhir kali? 
 
-Dari pengalaman nyata dan rasa gemas karena sering pelupa itulah **PawRoutine** lahir! Aplikasi web interaktif ini dirancang khusus untuk merapikan seluruh rutinitas harian hewan peliharaan langsung dari genggaman HP atau laptop.
+Dari pengalaman nyata dan rasa gemas karena sering pelupa itulah **PawRoutine** lahir! Aplikasi web interaktif ini dirancang khusus untuk merapikan seluruh rutinitas harian hewan peliharaan langsung dari genggaman HP atau laptop. **Mulai dari keadaan bersih (polos tanpa data bawaan)**, kamu bebas menambahkan profil anabul sesuai peliharaan aslimu di rumah!
 
 ---
 
 ## ✨ Key Features (Fitur Utama)
 
 1. **Multi-Pet Support (Manajemen Banyak Anabul):** 
-   - Bisa memantau lebih dari satu peliharaan sekaligus (misal: Musang, Kucing, Hamster, dll.) dengan profil dan foto kustom masing-masing.
+   - Keadaan awal bersih/polos, bebas menambahkan peliharaan (musang, kucing, anjing, hamster, burung, dll.) dengan profil dan foto kustom masing-masing.
 2. **Per-Pet Food Inventory (Stok Makanan Spesifik):** 
-   - Setiap anabul punya daftar persediaan makanannya sendiri (tidak tercampur), lengkap dengan sistem pantau jumlah porsi fisik.
+   - Setiap anabul punya daftar persediaan makanannya sendiri (tidak tercampur), lengkap dengan sistem pantau jumlah fisik dan jenis satuannya.
 3. **Daily Feeding Log & Cute Sound Feedback:** 
-   - Catat porsi makan harian (hitung per biji/porsi) disertai riwayat jam makan, lengkap dengan animasi dan efek suara gemes saat tombol ditekan!
+   - Tombol simpel "Catat Kasih Makan" disertai riwayat jam makan, lengkap dengan animasi dan efek suara gemes saat ditekan!
 4. **Health & Milestone Journal:** 
    - Catatan interaktif untuk estimasi umur, jadwal mandi (yang bisa disinkronkan langsung dengan satu klik), hingga riwayat obat cacing.
-5. **Calendar History (Kalender Log):** 
-   - Fitur rekap harian untuk melihat kembali ringkasan aktivitas perawatan anabul di hari-hari sebelumnya.
+5. **Calendar History & Undo Log (Kalender & Pembatalan Rekap):** 
+   - Fitur rekap harian untuk melihat ringkasan aktivitas di hari sebelumnya, lengkap dengan tombol **Batalkan** jika rekap harian tidak sengaja terpencet.
 6. **Data Backup & Restore (JSON):** 
    - Fitur aman berbasis lokal yang memungkinkan kamu mengunduh dan memulihkan seluruh data riwayat perawatan kapan pun dibutuhkan.
 7. **PWA Ready:** 
