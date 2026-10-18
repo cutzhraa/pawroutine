@@ -28,7 +28,8 @@ export default function App() {
       estimatedAge: '± 6 bulan',
       historyDays: [],
       foodList: [
-        { id: 101, name: 'Pisang', qty: 3, unit: 'sisir', note: 'Stok di rumah' }
+        { id: 101, name: 'Pisang', qty: 3, unit: 'sisir', type: 'food', note: 'Stok makanan utama' },
+        { id: 102, name: 'Vitamin / Suplemen', qty: 1, unit: botol, type: 'vitamin', note: 'Suplemen harian' }
       ]
     }];
   });
@@ -45,6 +46,7 @@ export default function App() {
   const [newFoodName, setNewFoodName] = useState('');
   const [newFoodQty, setNewFoodQty] = useState(1);
   const [newFoodUnit, setNewFoodUnit] = useState('Porsi / Buah');
+  const [newFoodType, setNewFoodType] = useState('food'); // 'food' atau 'vitamin'
   const [newFoodNote, setNewFoodNote] = useState('');
 
   const [showAddPetModal, setShowAddPetModal] = useState(false);
@@ -105,14 +107,14 @@ export default function App() {
     }
   };
 
-  // HITUNG TOTAL STOK MAKANAN YANG TERSEDIA
   const foodItems = currentPet.foodList || [];
-  const totalStockQty = foodItems.reduce((acc, item) => acc + item.qty, 0);
+  // Hitung total stok makanan dan stok vitamin
+  const totalFoodQty = foodItems.filter(i => i.type === 'food' || !i.type).reduce((acc, item) => acc + item.qty, 0);
+  const totalVitaminQty = foodItems.filter(i => i.type === 'vitamin').reduce((acc, item) => acc + item.qty, 0);
 
   const handleFeed = () => {
-    // Validasi: Jika total stok habis (0), cegah pencatatan
-    if (totalStockQty <= 0) {
-      alert("Stok makanan habis! Tambahkan stok makanan terlebih dahulu sebelum memberi makan.");
+    if (totalFoodQty <= 0) {
+      alert("Stok makanan habis! Tambahkan stok makanan terlebih dahulu.");
       return;
     }
 
@@ -142,6 +144,11 @@ export default function App() {
   };
 
   const handleVitamin = () => {
+    if (totalVitaminQty <= 0) {
+      alert("Stok vitamin/suplemen kosong! Tambahkan stok vitamin terlebih dahulu di menu inventaris.");
+      return;
+    }
+
     playCuteSound();
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 2000);
@@ -226,7 +233,14 @@ export default function App() {
   const handleAddCustomFood = (e) => {
     e.preventDefault();
     if (!newFoodName) return;
-    const newItem = { id: Date.now(), name: newFoodName, qty: Number(newFoodQty), unit: newFoodUnit, note: newFoodNote };
+    const newItem = { 
+      id: Date.now(), 
+      name: newFoodName, 
+      qty: Number(newFoodQty), 
+      unit: newFoodUnit, 
+      type: newFoodType, 
+      note: newFoodNote 
+    };
     
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
@@ -452,21 +466,26 @@ export default function App() {
               )}
             </div>
 
-            {/* Stok Makanan Khusus Anabul Aktif */}
+            {/* Inventaris Stok Makanan & Vitamin */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
-              <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">📦 Stok Makanan ({currentPet.name})</h3>
+              <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">📦 Stok Makanan & Vitamin ({currentPet.name})</h3>
               
               {foodItems.length === 0 ? (
                 <div className="bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl text-center text-xs text-rose-300">
-                  ⚠️ Stok Makanan Kosong! Tombol catat makan terkunci sampai stok ditambahkan.
+                  ⚠️ Inventaris kosong! Tombol makan & vitamin terkunci.
                 </div>
               ) : (
                 <div className="space-y-3">
                   {foodItems.map((item) => (
                     <div key={item.id} className="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center">
                       <div>
-                        <p className="text-xs font-semibold text-slate-200">{item.name}</p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">{item.note || '-'}</p>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-xs font-semibold text-slate-200">{item.name}</p>
+                          <span className={`text-[10px] px-2 py-0.5 rounded border ${item.type === 'vitamin' ? 'bg-amber-500/10 text-amber-300 border-amber-500/30' : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'}`}>
+                            {item.type === 'vitamin' ? '💊 Vitamin' : '🍽️ Makanan'}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">{item.note || '-'}</p>
                         <p className="text-lg font-bold text-emerald-400 mt-1">
                           {item.qty} <span className="text-xs text-slate-400 font-normal">{item.unit}</span>
                         </p>
@@ -482,16 +501,20 @@ export default function App() {
               )}
 
               <form onSubmit={handleAddCustomFood} className="pt-3 border-t border-slate-800 space-y-2.5">
-                <p className="text-xs text-slate-400 font-medium">+ Tambah Stok Khusus {currentPet.name}:</p>
+                <p className="text-xs text-slate-400 font-medium">+ Tambah Item Baru ke Inventaris:</p>
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="text" placeholder="Nama (Mis: Pisang)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
-                  <input type="text" placeholder="Satuan (Mis: Sisir)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="text" placeholder="Nama (Mis: Pisang / Madu)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
+                  <select value={newFoodType} onChange={(e) => setNewFoodType(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-100">
+                    <option value="food">Kategori: Makanan</option>
+                    <option value="vitamin">Kategori: Vitamin</option>
+                  </select>
                 </div>
                 <div className="flex space-x-2">
-                  <input type="number" placeholder="Jumlah" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
+                  <input type="number" placeholder="Jumlah" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-20 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
+                  <input type="text" placeholder="Satuan (Mis: Sisir / Botol)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-28 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                   <input type="text" placeholder="Catatan" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
-                <button type="submit" className="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-medium py-2 rounded-xl border border-emerald-500/30">Simpan Stok</button>
+                <button type="submit" className="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-medium py-2 rounded-xl border border-emerald-500/30">Simpan ke Stok</button>
               </form>
             </div>
 
@@ -516,14 +539,14 @@ export default function App() {
 
               <button 
                 onClick={handleFeed} 
-                disabled={totalStockQty <= 0}
+                disabled={totalFoodQty <= 0}
                 className={`w-full py-3.5 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${
-                  totalStockQty <= 0 
+                  totalFoodQty <= 0 
                     ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed' 
                     : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20'
                 }`}
               >
-                <span>{totalStockQty <= 0 ? '⚠️ Stok Makanan Kosong (Terkunci)' : `🍽️ Catat Kasih Makan (${feedAmountInput} Porsi)`}</span>
+                <span>{totalFoodQty <= 0 ? '⚠️ Stok Makanan Kosong (Terkunci)' : `🍽️ Catat Kasih Makan (${feedAmountInput} Porsi)`}</span>
               </button>
 
               {feedLogs.length > 0 && (
@@ -546,8 +569,24 @@ export default function App() {
                 </div>
               )}
 
-              <button onClick={handleVitamin} disabled={currentPet.vitaminGiven} className={`w-full py-3 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${currentPet.vitaminGiven ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed' : 'bg-teal-600 hover:bg-teal-500 text-white shadow-lg'}`}>
-                <span>{currentPet.vitaminGiven ? '✅ Vitamin Selesai' : '💊 Beri Vitamin / Suplemen'}</span>
+              <button 
+                onClick={handleVitamin} 
+                disabled={currentPet.vitaminGiven || totalVitaminQty <= 0} 
+                className={`w-full py-3 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${
+                  currentPet.vitaminGiven 
+                    ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed' 
+                    : totalVitaminQty <= 0 
+                    ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed' 
+                    : 'bg-teal-600 hover:bg-teal-500 text-white shadow-lg'
+                }`}
+              >
+                <span>
+                  {currentPet.vitaminGiven 
+                    ? '✅ Vitamin Selesai' 
+                    : totalVitaminQty <= 0 
+                    ? '⚠️ Stok Vitamin Kosong (Terkunci)' 
+                    : '💊 Beri Vitamin / Suplemen'}
+                </span>
               </button>
 
               <button onClick={handleResetDay} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl border border-slate-700">
