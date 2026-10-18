@@ -45,9 +45,10 @@ Dari pengalaman nyata dan rasa gemas karena sering pelupa itulah **PawRoutine** 
 
 ---
 
-## 🚀 Getting Started (Cara Menjalankan)
+## 🚀 Getting Started & Deployment
 
-Kalau kamu mau clone dan running proyek ini secara lokal di komputermu, ikuti langkah ini:
+### 1. Cara Menjalankan Lokal (Development)
+Kalau kamu mau *clone* dan *running* proyek ini secara lokal di komputermu, ikuti langkah ini:
 
 ```bash
 # 1. Clone repository ini
