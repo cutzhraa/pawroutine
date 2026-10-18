@@ -105,7 +105,17 @@ export default function App() {
     }
   };
 
+  // HITUNG TOTAL STOK MAKANAN YANG TERSEDIA
+  const foodItems = currentPet.foodList || [];
+  const totalStockQty = foodItems.reduce((acc, item) => acc + item.qty, 0);
+
   const handleFeed = () => {
+    // Validasi: Jika total stok habis (0), cegah pencatatan
+    if (totalStockQty <= 0) {
+      alert("Stok makanan habis! Tambahkan stok makanan terlebih dahulu sebelum memberi makan.");
+      return;
+    }
+
     playCuteSound();
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 2000);
@@ -121,7 +131,6 @@ export default function App() {
     }));
   };
 
-  // SOLUSI 1: Fitur Hapus/Undo Riwayat Input Makan yang Salah
   const handleDeleteFeedLog = (logId) => {
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
@@ -287,7 +296,6 @@ export default function App() {
 
   const feedLogs = currentPet.feedLogToday || [];
   const totalPorsiToday = feedLogs.reduce((acc, curr) => acc + curr.amount, 0);
-  const foodItems = currentPet.foodList || [];
   const historyList = currentPet.historyDays || [];
 
   return (
@@ -449,8 +457,8 @@ export default function App() {
               <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">📦 Stok Makanan ({currentPet.name})</h3>
               
               {foodItems.length === 0 ? (
-                <div className="bg-slate-950/40 border border-slate-800/80 p-3 rounded-xl text-center text-xs text-slate-500">
-                  Belum ada stok makanan untuk {currentPet.name}. Tambahkan di bawah!
+                <div className="bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl text-center text-xs text-rose-300">
+                  ⚠️ Stok Makanan Kosong! Tombol catat makan terkunci sampai stok ditambahkan.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -476,8 +484,8 @@ export default function App() {
               <form onSubmit={handleAddCustomFood} className="pt-3 border-t border-slate-800 space-y-2.5">
                 <p className="text-xs text-slate-400 font-medium">+ Tambah Stok Khusus {currentPet.name}:</p>
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="text" placeholder="Nama (Mis: Cat Choize)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
-                  <input type="text" placeholder="Satuan (Mis: Bungkus)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="text" placeholder="Nama (Mis: Pisang)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
+                  <input type="text" placeholder="Satuan (Mis: Sisir)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
                 <div className="flex space-x-2">
                   <input type="number" placeholder="Jumlah" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-24 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
@@ -506,8 +514,16 @@ export default function App() {
                 </div>
               </div>
 
-              <button onClick={handleFeed} className="w-full py-3.5 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20">
-                <span>🍽️ Catat Kasih Makan ({feedAmountInput} Porsi)</span>
+              <button 
+                onClick={handleFeed} 
+                disabled={totalStockQty <= 0}
+                className={`w-full py-3.5 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${
+                  totalStockQty <= 0 
+                    ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed' 
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                }`}
+              >
+                <span>{totalStockQty <= 0 ? '⚠️ Stok Makanan Kosong (Terkunci)' : `🍽️ Catat Kasih Makan (${feedAmountInput} Porsi)`}</span>
               </button>
 
               {feedLogs.length > 0 && (
