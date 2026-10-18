@@ -32,7 +32,7 @@ export default function App() {
         estimatedAge: '± 6 bulan',
         historyDays: [],
         foodList: [
-          { id: 101, name: 'Pisang', qty: 3, unit: 'sisir', type: 'food', note: 'Stok di kulkas' },
+          { id: 101, name: 'Pisang', qty: 10, unit: 'biji', type: 'food', note: 'Stok di kulkas' },
           { id: 102, name: 'Vitamin Cair', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen harian' }
         ]
       },
@@ -49,7 +49,7 @@ export default function App() {
         estimatedAge: '± 1 tahun',
         historyDays: [],
         foodList: [
-          { id: 201, name: 'Cat Choize', qty: 2, unit: 'kg', type: 'food', note: 'Makanan kering' },
+          { id: 201, name: 'Cat Choize', qty: 500, unit: 'gram', type: 'food', note: 'Makanan kering' },
           { id: 202, name: 'Vitamin Kulit', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen bulu' }
         ]
       }
@@ -67,7 +67,7 @@ export default function App() {
 
   const [newFoodName, setNewFoodName] = useState('');
   const [newFoodQty, setNewFoodQty] = useState(1);
-  const [newFoodUnit, setNewFoodUnit] = useState('sisir');
+  const [newFoodUnit, setNewFoodUnit] = useState('biji');
   const [newFoodType, setNewFoodType] = useState('food');
   const [newFoodNote, setNewFoodNote] = useState('');
 
@@ -130,21 +130,43 @@ export default function App() {
   };
 
   const foodItems = currentPet.foodList || [];
+  
+  // Hitung total stok makanan & vitamin spesifik untuk anabul aktif
+  const totalFoodQty = foodItems.filter(i => i.type === 'food' || !i.type).reduce((acc, item) => acc + item.qty, 0);
+  const totalVitaminQty = foodItems.filter(i => i.type === 'vitamin').reduce((acc, item) => acc + item.qty, 0);
 
   const handleFeed = () => {
+    if (totalFoodQty <= 0) {
+      alert("Stok makanan kosong! Silakan tambah stok terlebih dahulu.");
+      return;
+    }
+
+    const porsiDiberikan = Number(feedAmountInput);
+
     playCuteSound();
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 2000);
 
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const porsiDiberikan = Number(feedAmountInput);
     const newLog = { id: Date.now(), time: currentTime, amount: porsiDiberikan };
 
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
+        // Otomatis kurangi stok makanan item pertama yang bertipe 'food'
+        let remainingToSubtract = porsiDiberikan;
+        const updatedFoodList = (p.foodList || []).map(item => {
+          if ((item.type === 'food' || !item.type) && remainingToSubtract > 0) {
+            const take = Math.min(item.qty, remainingToSubtract);
+            remainingToSubtract -= take;
+            return { ...item, qty: Math.max(0, item.qty - take) };
+          }
+          return item;
+        });
+
         return { 
           ...p, 
-          feedLogToday: [...(p.feedLogToday || []), newLog]
+          feedLogToday: [...(p.feedLogToday || []), newLog],
+          foodList: updatedFoodList
         };
       }
       return p;
@@ -162,6 +184,11 @@ export default function App() {
   };
 
   const handleVitamin = () => {
+    if (totalVitaminQty <= 0) {
+      alert("Stok vitamin kosong!");
+      return;
+    }
+
     playCuteSound();
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 2000);
@@ -353,7 +380,7 @@ export default function App() {
             </div>
             <div className="space-y-1">
               <h2 className="text-base font-bold text-emerald-400">Yummy! {currentPet.name} Kenyang</h2>
-              <p className="text-xs text-slate-300">Catatan makan berhasil disimpan.</p>
+              <p className="text-xs text-slate-300">Stok otomatis berkurang & catatan tersimpan.</p>
             </div>
           </div>
         </div>
@@ -513,7 +540,7 @@ export default function App() {
               
               {foodItems.length === 0 ? (
                 <div className="bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl text-center text-xs text-rose-300">
-                  ⚠️ Belum ada stok untuk {currentPet.name}. Tambahkan di bawah!
+                  ⚠️ Stok Kosong! Tombol makan & vitamin terkunci.
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -554,7 +581,7 @@ export default function App() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <input type="number" placeholder="Jumlah" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
-                  <input type="text" placeholder="Satuan (sisir/kg/biji)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="text" placeholder="Satuan (biji/kg)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
 
                 <div>
@@ -584,11 +611,17 @@ export default function App() {
                 </div>
               </div>
 
+              {/* Tombol Kasih Makan Terkunci Otomatis Jika Stok Makanan Habis */}
               <button 
                 onClick={handleFeed} 
-                className="w-full py-3.5 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20"
+                disabled={totalFoodQty <= 0}
+                className={`w-full py-3.5 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${
+                  totalFoodQty <= 0 
+                    ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed' 
+                    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20'
+                }`}
               >
-                <span>🍽️ Catat Kasih Makan ({feedAmountInput} Porsi)</span>
+                <span>{totalFoodQty <= 0 ? '⚠️ Stok Makanan Kosong (Terkunci)' : `🍽️ Catat Kasih Makan (${feedAmountInput} Porsi)`}</span>
               </button>
 
               {feedLogs.length > 0 && (
@@ -623,16 +656,23 @@ export default function App() {
                 <span>{currentPet.waterGiven ? '💧 Air Minum Sudah Diganti/Dicek' : '💧 Ganti / Cek Air Minum Bersih'}</span>
               </button>
 
+              {/* Tombol Vitamin Terkunci Otomatis Jika Stok Vitamin Habis */}
               <button 
                 onClick={handleVitamin} 
-                disabled={currentPet.vitaminGiven} 
+                disabled={currentPet.vitaminGiven || totalVitaminQty <= 0} 
                 className={`w-full py-3 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${
-                  currentPet.vitaminGiven 
+                  currentPet.vitaminGiven || totalVitaminQty <= 0
                     ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed' 
                     : 'bg-teal-600 hover:bg-teal-500 text-white shadow-lg'
                 }`}
               >
-                <span>{currentPet.vitaminGiven ? '✅ Vitamin Selesai' : '💊 Beri Vitamin / Suplemen'}</span>
+                <span>
+                  {currentPet.vitaminGiven 
+                    ? '✅ Vitamin Selesai' 
+                    : totalVitaminQty <= 0 
+                    ? '⚠️ Stok Vitamin Kosong (Terkunci)' 
+                    : '💊 Beri Vitamin / Suplemen'}
+                </span>
               </button>
 
               <button onClick={handleResetDay} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl border border-slate-700">
