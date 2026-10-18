@@ -29,7 +29,7 @@ export default function App() {
       historyDays: [],
       foodList: [
         { id: 101, name: 'Pisang', qty: 3, unit: 'sisir', type: 'food', note: 'Stok makanan utama' },
-        { id: 102, name: 'Vitamin / Suplemen', qty: 1, unit: botol, type: 'vitamin', note: 'Suplemen harian' }
+        { id: 102, name: 'Vitamin / Suplemen', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen harian' }
       ]
     }];
   });
@@ -46,7 +46,7 @@ export default function App() {
   const [newFoodName, setNewFoodName] = useState('');
   const [newFoodQty, setNewFoodQty] = useState(1);
   const [newFoodUnit, setNewFoodUnit] = useState('Porsi / Buah');
-  const [newFoodType, setNewFoodType] = useState('food'); // 'food' atau 'vitamin'
+  const [newFoodType, setNewFoodType] = useState('food');
   const [newFoodNote, setNewFoodNote] = useState('');
 
   const [showAddPetModal, setShowAddPetModal] = useState(false);
@@ -108,7 +108,6 @@ export default function App() {
   };
 
   const foodItems = currentPet.foodList || [];
-  // Hitung total stok makanan dan stok vitamin
   const totalFoodQty = foodItems.filter(i => i.type === 'food' || !i.type).reduce((acc, item) => acc + item.qty, 0);
   const totalVitaminQty = foodItems.filter(i => i.type === 'vitamin').reduce((acc, item) => acc + item.qty, 0);
 
@@ -466,7 +465,7 @@ export default function App() {
               )}
             </div>
 
-            {/* Inventaris Stok Makanan & Vitamin */}
+            {/* Inventaris Stok Makanan & Vitamin (Form Diperbaiki agar tidak overflow) */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
               <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">📦 Stok Makanan & Vitamin ({currentPet.name})</h3>
               
@@ -502,18 +501,24 @@ export default function App() {
 
               <form onSubmit={handleAddCustomFood} className="pt-3 border-t border-slate-800 space-y-2.5">
                 <p className="text-xs text-slate-400 font-medium">+ Tambah Item Baru ke Inventaris:</p>
+                
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="text" placeholder="Nama (Mis: Pisang / Madu)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
-                  <select value={newFoodType} onChange={(e) => setNewFoodType(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-100">
-                    <option value="food">Kategori: Makanan</option>
-                    <option value="vitamin">Kategori: Vitamin</option>
+                  <input type="text" placeholder="Nama (Mis: Pisang)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
+                  <select value={newFoodType} onChange={(e) => setNewFoodType(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-100">
+                    <option value="food">Makanan</option>
+                    <option value="vitamin">Vitamin</option>
                   </select>
                 </div>
-                <div className="flex space-x-2">
-                  <input type="number" placeholder="Jumlah" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-20 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
-                  <input type="text" placeholder="Satuan (Mis: Sisir / Botol)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-28 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
-                  <input type="text" placeholder="Catatan" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="number" placeholder="Jumlah (Mis: 3)" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
+                  <input type="text" placeholder="Satuan (Mis: Sisir)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
+
+                <div>
+                  <input type="text" placeholder="Catatan opsional (Mis: Stok di lemari)" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                </div>
+
                 <button type="submit" className="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-medium py-2 rounded-xl border border-emerald-500/30">Simpan ke Stok</button>
               </form>
             </div>
