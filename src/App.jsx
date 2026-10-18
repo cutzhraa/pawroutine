@@ -10,28 +10,50 @@ export default function App() {
           ...p,
           foodList: p.foodList || [],
           feedLogToday: p.feedLogToday || [],
-          historyDays: p.historyDays || []
+          historyDays: p.historyDays || [],
+          waterGiven: p.waterGiven || false,
+          vitaminGiven: p.vitaminGiven || false
         }));
       } catch (e) {
         console.error("Gagal parse localStorage", e);
       }
     }
-    return [{
-      id: 1,
-      name: 'Musang Jojo',
-      species: 'Musang / Civet',
-      photo: null,
-      feedLogToday: [],
-      vitaminGiven: false,
-      lastBath: '3 hari yang lalu',
-      lastDeworm: '2 bulan yang lalu',
-      estimatedAge: '± 6 bulan',
-      historyDays: [],
-      foodList: [
-        { id: 101, name: 'Pisang', qty: 3, unit: 'sisir', type: 'food', note: 'Stok di kulkas' },
-        { id: 102, name: 'Vitamin / Suplemen', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen harian' }
-      ]
-    }];
+    return [
+      {
+        id: 1,
+        name: 'Musang Jojo',
+        species: 'Musang / Civet',
+        photo: null,
+        feedLogToday: [],
+        vitaminGiven: false,
+        waterGiven: false,
+        lastBath: '3 hari yang lalu',
+        lastDeworm: '2 bulan yang lalu',
+        estimatedAge: '± 6 bulan',
+        historyDays: [],
+        foodList: [
+          { id: 101, name: 'Pisang', qty: 3, unit: 'sisir', type: 'food', note: 'Stok di kulkas' },
+          { id: 102, name: 'Vitamin Cair', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen harian' }
+        ]
+      },
+      {
+        id: 2,
+        name: 'Kucing Miko',
+        species: 'Kucing / Cat',
+        photo: null,
+        feedLogToday: [],
+        vitaminGiven: false,
+        waterGiven: false,
+        lastBath: '1 minggu yang lalu',
+        lastDeworm: '3 bulan yang lalu',
+        estimatedAge: '± 1 tahun',
+        historyDays: [],
+        foodList: [
+          { id: 201, name: 'Cat Choize', qty: 2, unit: 'kg', type: 'food', note: 'Makanan kering' },
+          { id: 202, name: 'Vitamin Kulit', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen bulu' }
+        ]
+      }
+    ];
   });
 
   const [activePetId, setActivePetId] = useState(() => {
@@ -108,15 +130,8 @@ export default function App() {
   };
 
   const foodItems = currentPet.foodList || [];
-  const totalFoodQty = foodItems.filter(i => i.type === 'food' || !i.type).reduce((acc, item) => acc + item.qty, 0);
-  const totalVitaminQty = foodItems.filter(i => i.type === 'vitamin').reduce((acc, item) => acc + item.qty, 0);
 
   const handleFeed = () => {
-    if (totalFoodQty <= 0) {
-      alert("Stok makanan habis! Tambahkan stok terlebih dahulu.");
-      return;
-    }
-
     playCuteSound();
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 2000);
@@ -127,18 +142,9 @@ export default function App() {
 
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
-        // Pengurangan stok proporsional (mengurangi 1 unit item makanan pertama yang tersedia per 1 catatan aksi makan, terlepas dari berapa porsi yang dipilih)
-        const updatedFood = (p.foodList || []).map((item, idx) => {
-          if ((item.type === 'food' || !item.type) && idx === 0 && item.qty > 0) {
-            return { ...item, qty: Math.max(0, item.qty - 1) };
-          }
-          return item;
-        });
-
         return { 
           ...p, 
-          feedLogToday: [...(p.feedLogToday || []), newLog],
-          foodList: updatedFood
+          feedLogToday: [...(p.feedLogToday || []), newLog]
         };
       }
       return p;
@@ -149,35 +155,22 @@ export default function App() {
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
         const updatedLogs = (p.feedLogToday || []).filter(l => l.id !== logId);
-        
-        // Kembalikan 1 unit stok makanan yang sempat terpotong
-        const restoredFood = (p.foodList || []).map((item, idx) => {
-          if ((item.type === 'food' || !item.type) && idx === 0) {
-            return { ...item, qty: item.qty + 1 };
-          }
-          return item;
-        });
-
-        return { 
-          ...p, 
-          feedLogToday: updatedLogs,
-          foodList: restoredFood
-        };
+        return { ...p, feedLogToday: updatedLogs };
       }
       return p;
     }));
   };
 
   const handleVitamin = () => {
-    if (totalVitaminQty <= 0) {
-      alert("Stok vitamin/suplemen kosong! Tambahkan stok vitamin terlebih dahulu.");
-      return;
-    }
-
     playCuteSound();
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 2000);
     setPets(prev => prev.map(p => p.id === activePetId ? { ...p, vitaminGiven: true } : p));
+  };
+
+  const handleWater = () => {
+    playCuteSound();
+    setPets(prev => prev.map(p => p.id === activePetId ? { ...p, waterGiven: true } : p));
   };
 
   const handleBathDone = () => {
@@ -211,6 +204,7 @@ export default function App() {
       photo: null,
       feedLogToday: [],
       vitaminGiven: false,
+      waterGiven: false,
       lastBath: 'Baru saja',
       lastDeworm: 'Belum tercatat',
       estimatedAge: '± 3 bulan',
@@ -242,11 +236,18 @@ export default function App() {
       if (p.id === activePetId) {
         const logs = p.feedLogToday || [];
         const totalPorsi = logs.reduce((acc, curr) => acc + curr.amount, 0);
-        const daySummary = { date: todayStr, totalFeed: totalPorsi, logs: logs, vitamin: p.vitaminGiven };
+        const daySummary = { 
+          date: todayStr, 
+          totalFeed: totalPorsi, 
+          logs: logs, 
+          vitamin: p.vitaminGiven,
+          water: p.waterGiven 
+        };
         return {
           ...p,
           feedLogToday: [],
           vitaminGiven: false,
+          waterGiven: false,
           historyDays: [daySummary, ...(p.historyDays || [])]
         };
       }
@@ -340,7 +341,6 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-4 sm:p-8 font-sans pb-24 relative overflow-x-hidden">
       
-      {/* ANIMASI BARU: BERSIH, MENGGUNAKAN FOTO PROFIL ANABUL */}
       {showAnimation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
           <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-4 max-w-xs w-full">
@@ -353,7 +353,7 @@ export default function App() {
             </div>
             <div className="space-y-1">
               <h2 className="text-base font-bold text-emerald-400">Yummy! {currentPet.name} Kenyang</h2>
-              <p className="text-xs text-slate-300">Catatan makan berhasil disimpan dengan baik.</p>
+              <p className="text-xs text-slate-300">Catatan makan berhasil disimpan.</p>
             </div>
           </div>
         </div>
@@ -436,17 +436,24 @@ export default function App() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                <div className={`p-3 rounded-xl border transition ${feedLogs.length > 0 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300'}`}>
-                  <span className="text-xs block text-slate-400">Makan Hari Ini</span>
-                  <span className="font-semibold text-sm flex items-center mt-1">
-                    {totalPorsiToday} Porsi ({feedLogs.length}x) 🍽️
+              <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className={`p-2.5 rounded-xl border transition ${feedLogs.length > 0 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300'}`}>
+                  <span className="text-[10px] block text-slate-400">Makan</span>
+                  <span className="font-semibold text-xs flex items-center mt-0.5">
+                    {totalPorsiToday} Porsi 🍽️
                   </span>
                 </div>
 
-                <div className={`p-3 rounded-xl border transition ${currentPet.vitaminGiven ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'}`}>
-                  <span className="text-xs block text-slate-400">Vitamin / Suplemen</span>
-                  <span className="font-semibold text-sm flex items-center mt-1">
+                <div className={`p-2.5 rounded-xl border transition ${currentPet.waterGiven ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-sky-500/10 border-sky-500/30 text-sky-300'}`}>
+                  <span className="text-[10px] block text-slate-400">Air Minum</span>
+                  <span className="font-semibold text-xs flex items-center mt-0.5">
+                    {currentPet.waterGiven ? '✅ Fresh' : '💧 Cek'}
+                  </span>
+                </div>
+
+                <div className={`p-2.5 rounded-xl border transition ${currentPet.vitaminGiven ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'}`}>
+                  <span className="text-[10px] block text-slate-400">Vitamin</span>
+                  <span className="font-semibold text-xs flex items-center mt-0.5">
                     {currentPet.vitaminGiven ? '✅ Selesai' : '⚠️ Belum'}
                   </span>
                 </div>
@@ -500,13 +507,13 @@ export default function App() {
               )}
             </div>
 
-            {/* Inventaris Stok Makanan & Vitamin */}
+            {/* Inventaris Stok Spesifik Per Hewan */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
               <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">📦 Stok Makanan & Vitamin ({currentPet.name})</h3>
               
               {foodItems.length === 0 ? (
                 <div className="bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl text-center text-xs text-rose-300">
-                  ⚠️ Inventaris kosong! Tombol makan & vitamin terkunci.
+                  ⚠️ Belum ada stok untuk {currentPet.name}. Tambahkan di bawah!
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -535,7 +542,7 @@ export default function App() {
               )}
 
               <form onSubmit={handleAddCustomFood} className="pt-3 border-t border-slate-800 space-y-2.5">
-                <p className="text-xs text-slate-400 font-medium">+ Tambah Item Baru ke Inventaris:</p>
+                <p className="text-xs text-slate-400 font-medium">+ Tambah Stok Khusus {currentPet.name}:</p>
                 
                 <div className="grid grid-cols-2 gap-2">
                   <input type="text" placeholder="Nama (Mis: Pisang)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
@@ -546,12 +553,12 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="number" placeholder="Jumlah (Mis: 3)" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
-                  <input type="text" placeholder="Satuan (Mis: sisir / gram)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="number" placeholder="Jumlah" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
+                  <input type="text" placeholder="Satuan (sisir/kg/biji)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
 
                 <div>
-                  <input type="text" placeholder="Catatan opsional" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="text" placeholder="Catatan" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
 
                 <button type="submit" className="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-medium py-2 rounded-xl border border-emerald-500/30">Simpan ke Stok</button>
@@ -559,10 +566,10 @@ export default function App() {
             </div>
 
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
-              <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">Aksi Cepat Harian 🐾</h3>
+              <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">Aksi Cepat Harian ({currentPet.name}) 🐾</h3>
               
               <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800 space-y-2">
-                <label className="text-xs text-slate-400 block">Pilih jumlah porsi / biji yang ingin diberikan:</label>
+                <label className="text-xs text-slate-400 block">Pilih jumlah porsi / biji yang ingin dicatat:</label>
                 <div className="flex space-x-2">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <button
@@ -579,19 +586,14 @@ export default function App() {
 
               <button 
                 onClick={handleFeed} 
-                disabled={totalFoodQty <= 0}
-                className={`w-full py-3.5 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${
-                  totalFoodQty <= 0 
-                    ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed' 
-                    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20'
-                }`}
+                className="w-full py-3.5 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20"
               >
-                <span>{totalFoodQty <= 0 ? '⚠️ Stok Makanan Kosong (Terkunci)' : `🍽️ Catat Kasih Makan (${feedAmountInput} Porsi)`}</span>
+                <span>🍽️ Catat Kasih Makan ({feedAmountInput} Porsi)</span>
               </button>
 
               {feedLogs.length > 0 && (
                 <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
-                  <span className="text-[11px] text-slate-400 block font-medium">Riwayat Makan Hari Ini (Klik ✕ jika salah input, stok kembali):</span>
+                  <span className="text-[11px] text-slate-400 block font-medium">Riwayat Makan Hari Ini:</span>
                   <div className="flex flex-wrap gap-1.5">
                     {feedLogs.map((log) => (
                       <span key={log.id} className="text-[11px] bg-slate-800 text-emerald-300 px-2.5 py-1 rounded-lg border border-slate-700 flex items-center space-x-1.5">
@@ -599,7 +601,7 @@ export default function App() {
                         <button 
                           onClick={() => handleDeleteFeedLog(log.id)}
                           className="text-rose-400 hover:text-rose-300 font-bold ml-1 px-1 rounded bg-rose-500/10"
-                          title="Batalkan dan kembalikan stok"
+                          title="Hapus entri riwayat"
                         >
                           ✕
                         </button>
@@ -610,23 +612,27 @@ export default function App() {
               )}
 
               <button 
+                onClick={handleWater} 
+                disabled={currentPet.waterGiven} 
+                className={`w-full py-3 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${
+                  currentPet.waterGiven 
+                    ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed' 
+                    : 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg'
+                }`}
+              >
+                <span>{currentPet.waterGiven ? '💧 Air Minum Sudah Diganti/Dicek' : '💧 Ganti / Cek Air Minum Bersih'}</span>
+              </button>
+
+              <button 
                 onClick={handleVitamin} 
-                disabled={currentPet.vitaminGiven || totalVitaminQty <= 0} 
+                disabled={currentPet.vitaminGiven} 
                 className={`w-full py-3 px-4 rounded-xl font-medium transition flex items-center justify-center space-x-2 ${
                   currentPet.vitaminGiven 
                     ? 'bg-slate-800 text-slate-500 border border-slate-700/50 cursor-not-allowed' 
-                    : totalVitaminQty <= 0 
-                    ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed' 
                     : 'bg-teal-600 hover:bg-teal-500 text-white shadow-lg'
                 }`}
               >
-                <span>
-                  {currentPet.vitaminGiven 
-                    ? '✅ Vitamin Selesai' 
-                    : totalVitaminQty <= 0 
-                    ? '⚠️ Stok Vitamin Kosong (Terkunci)' 
-                    : '💊 Beri Vitamin / Suplemen'}
-                </span>
+                <span>{currentPet.vitaminGiven ? '✅ Vitamin Selesai' : '💊 Beri Vitamin / Suplemen'}</span>
               </button>
 
               <button onClick={handleResetDay} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl border border-slate-700">
