@@ -131,7 +131,6 @@ export default function App() {
 
   const foodItems = currentPet.foodList || [];
   
-  // Hitung total stok makanan & vitamin spesifik untuk anabul aktif
   const totalFoodQty = foodItems.filter(i => i.type === 'food' || !i.type).reduce((acc, item) => acc + item.qty, 0);
   const totalVitaminQty = foodItems.filter(i => i.type === 'vitamin').reduce((acc, item) => acc + item.qty, 0);
 
@@ -140,6 +139,8 @@ export default function App() {
       alert("Stok makanan kosong! Silakan tambah stok terlebih dahulu.");
       return;
     }
+
+    const porsiDiberikan = Number(feedAmountInput);
 
     const mainFoodItem = foodItems.find(i => i.type === 'food' || !i.type);
     if (mainFoodItem && mainFoodItem.qty < porsiDiberikan) {
