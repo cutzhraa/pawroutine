@@ -52,7 +52,7 @@ Kalau kamu mau *clone* dan *running* proyek ini secara lokal di komputermu, ikut
 
 ```bash
 # 1. Clone repository ini
-git clone [https://github.com/username/pawroutine.git](https://github.com/username/pawroutine.git)
+git clone [https://github.com/cutzhrza/pawroutine.git](https://github.com/cutzhrza/pawroutine.git)
 
 # 2. Masuk ke direktori proyek
 cd pawroutine
@@ -63,17 +63,22 @@ npm install
 # 4. Jalankan server lokal
 npm run dev
 
-2. Cara Akses Online (PWA Live Demo)
-Kamu bisa langsung menggunakan aplikasi ini secara online atau meng-install-nya sebagai PWA di HP melalui link live-nya:
-👉 https://pawroutineku.vercel.app
+```
 
-3. Cara Deploy Sendiri (Vercel)
+### 2. Cara Akses Online (PWA Live Demo)
+
+Kamu bisa langsung menggunakan aplikasi ini secara online atau meng-*install*-nya sebagai PWA di HP melalui link live-nya:
+👉 **[https://pawroutineku.vercel.app](https://pawroutineku.vercel.app)**
+
+### 3. Cara Deploy Sendiri (Vercel)
+
 Mau deploy project ini sendiri biar punya link online pribadi? Gampang banget:
 
-Push repository kamu ke GitHub.
+1. Push repository kamu ke GitHub.
+2. Buka [Vercel](https://vercel.com/), lalu klik **Add New Project**.
+3. Import repository `pawroutine`.
+4. Vercel bakal otomatis mendeteksi settingan Vite React, tinggal klik **Deploy**! Selesai dalam 1 menit.
 
-Buka Vercel, lalu klik Add New Project.
+```
 
-Import repository pawroutine.
-
-Vercel bakal otomatis mendeteksi settingan Vite React, tinggal klik Deploy! Selesai dalam 1 menit.
+```
