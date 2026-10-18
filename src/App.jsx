@@ -28,7 +28,7 @@ export default function App() {
       estimatedAge: '± 6 bulan',
       historyDays: [],
       foodList: [
-        { id: 101, name: 'Pisang', qty: 3, unit: 'sisir', type: 'food', note: 'Stok makanan utama' },
+        { id: 101, name: 'Pisang', qty: 3, unit: 'sisir', type: 'food', note: 'Stok di kulkas' },
         { id: 102, name: 'Vitamin / Suplemen', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen harian' }
       ]
     }];
@@ -45,7 +45,7 @@ export default function App() {
 
   const [newFoodName, setNewFoodName] = useState('');
   const [newFoodQty, setNewFoodQty] = useState(1);
-  const [newFoodUnit, setNewFoodUnit] = useState('Porsi / Buah');
+  const [newFoodUnit, setNewFoodUnit] = useState('sisir');
   const [newFoodType, setNewFoodType] = useState('food');
   const [newFoodNote, setNewFoodNote] = useState('');
 
@@ -111,9 +111,10 @@ export default function App() {
   const totalFoodQty = foodItems.filter(i => i.type === 'food' || !i.type).reduce((acc, item) => acc + item.qty, 0);
   const totalVitaminQty = foodItems.filter(i => i.type === 'vitamin').reduce((acc, item) => acc + item.qty, 0);
 
+  // LOGIKA PENGURANGAN STOK RIIL SAAT KASIH MAKAN
   const handleFeed = () => {
     if (totalFoodQty <= 0) {
-      alert("Stok makanan habis! Tambahkan stok makanan terlebih dahulu.");
+      alert("Stok makanan habis! Tambahkan stok terlebih dahulu.");
       return;
     }
 
@@ -122,21 +123,53 @@ export default function App() {
     setTimeout(() => setShowAnimation(false), 2000);
 
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const newLog = { id: Date.now(), time: currentTime, amount: Number(feedAmountInput) };
+    const porsiDiberikan = Number(feedAmountInput);
+    const newLog = { id: Date.now(), time: currentTime, amount: porsiDiberikan };
 
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
-        return { ...p, feedLogToday: [...(p.feedLogToday || []), newLog] };
+        // Kurangi stok makanan secara otomatis berdasarkan porsi yang diambil
+        let sisaKurang = porsiDiberikan;
+        const updatedFood = (p.foodList || []).map(item => {
+          if ((item.type === 'food' || !item.type) && sisaKurang > 0 && item.qty > 0) {
+            const pemotongan = Math.min(item.qty, sisaKurang);
+            sisaKurang -= pemotongan;
+            return { ...item, qty: item.qty - pemotongan };
+          }
+          return item;
+        });
+
+        return { 
+          ...p, 
+          feedLogToday: [...(p.feedLogToday || []), newLog],
+          foodList: updatedFood
+        };
       }
       return p;
     }));
   };
 
-  const handleDeleteFeedLog = (logId) => {
+  // JIKA SALAH INPUT/BATAL, STOK DIKEMBALIKAN OTOMATIS
+  const handleDeleteFeedLog = (logId, logAmount) => {
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
         const updatedLogs = (p.feedLogToday || []).filter(l => l.id !== logId);
-        return { ...p, feedLogToday: updatedLogs };
+        
+        // Kembalikan stok makanan yang sempat terpotong
+        let sisaKembali = logAmount;
+        const restoredFood = (p.foodList || []).map(item => {
+          if ((item.type === 'food' || !item.type) && sisaKembali > 0) {
+            sisaKembali -= 1;
+            return { ...item, qty: item.qty + 1 };
+          }
+          return item;
+        });
+
+        return { 
+          ...p, 
+          feedLogToday: updatedLogs,
+          foodList: restoredFood
+        };
       }
       return p;
     }));
@@ -144,7 +177,7 @@ export default function App() {
 
   const handleVitamin = () => {
     if (totalVitaminQty <= 0) {
-      alert("Stok vitamin/suplemen kosong! Tambahkan stok vitamin terlebih dahulu di menu inventaris.");
+      alert("Stok vitamin/suplemen kosong! Tambahkan stok vitamin terlebih dahulu.");
       return;
     }
 
@@ -465,7 +498,7 @@ export default function App() {
               )}
             </div>
 
-            {/* Inventaris Stok Makanan & Vitamin (Form Diperbaiki agar tidak overflow) */}
+            {/* Inventaris Stok Makanan & Vitamin (Disesuaikan agar fleksibel) */}
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
               <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">📦 Stok Makanan & Vitamin ({currentPet.name})</h3>
               
@@ -512,11 +545,11 @@ export default function App() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <input type="number" placeholder="Jumlah (Mis: 3)" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
-                  <input type="text" placeholder="Satuan (Mis: Sisir)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="text" placeholder="Satuan (Mis: sisir / gram / pcs)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
 
                 <div>
-                  <input type="text" placeholder="Catatan opsional (Mis: Stok di lemari)" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="text" placeholder="Catatan opsional (Mis: Stok di kulkas)" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
 
                 <button type="submit" className="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-medium py-2 rounded-xl border border-emerald-500/30">Simpan ke Stok</button>
@@ -527,7 +560,7 @@ export default function App() {
               <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">Aksi Cepat Harian 🐾</h3>
               
               <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800 space-y-2">
-                <label className="text-xs text-slate-400 block">Pilih jumlah porsi / biji per sekali makan:</label>
+                <label className="text-xs text-slate-400 block">Pilih jumlah porsi / biji yang ingin diberikan:</label>
                 <div className="flex space-x-2">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <button
@@ -556,15 +589,15 @@ export default function App() {
 
               {feedLogs.length > 0 && (
                 <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
-                  <span className="text-[11px] text-slate-400 block font-medium">Riwayat Makan Hari Ini (Klik ✕ untuk batal jika salah input):</span>
+                  <span className="text-[11px] text-slate-400 block font-medium">Riwayat Makan Hari Ini (Klik ✕ jika salah input, stok otomatis kembali):</span>
                   <div className="flex flex-wrap gap-1.5">
                     {feedLogs.map((log) => (
                       <span key={log.id} className="text-[11px] bg-slate-800 text-emerald-300 px-2.5 py-1 rounded-lg border border-slate-700 flex items-center space-x-1.5">
                         <span>🕒 {log.time} ({log.amount}p)</span>
                         <button 
-                          onClick={() => handleDeleteFeedLog(log.id)}
+                          onClick={() => handleDeleteFeedLog(log.id, log.amount)}
                           className="text-rose-400 hover:text-rose-300 font-bold ml-1 px-1 rounded bg-rose-500/10"
-                          title="Hapus / Batalkan entri ini"
+                          title="Batalkan dan kembalikan stok"
                         >
                           ✕
                         </button>
