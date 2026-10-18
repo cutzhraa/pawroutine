@@ -65,7 +65,7 @@ npm run dev
 
 2. Cara Akses Online (PWA Live Demo)
 Kamu bisa langsung menggunakan aplikasi ini secara online atau meng-install-nya sebagai PWA di HP melalui link live-nya:
-👉 https://pawroutine-nu.vercel.app
+👉 https://pawroutineku.vercel.app
 
 3. Cara Deploy Sendiri (Vercel)
 Mau deploy project ini sendiri biar punya link online pribadi? Gampang banget:
