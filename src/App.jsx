@@ -32,7 +32,7 @@ export default function App() {
         estimatedAge: '± 6 bulan',
         historyDays: [],
         foodList: [
-          { id: 101, name: 'Pisang', qty: 10, unit: 'biji', type: 'food', note: 'Stok di kulkas' },
+          { id: 101, name: 'Pisang', qty: 12, unit: 'potong / iris', type: 'food', note: 'Stok di kulkas' },
           { id: 102, name: 'Vitamin Cair', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen harian' }
         ]
       },
@@ -49,7 +49,7 @@ export default function App() {
         estimatedAge: '± 1 tahun',
         historyDays: [],
         foodList: [
-          { id: 201, name: 'Cat Choize', qty: 500, unit: 'gram', type: 'food', note: 'Makanan kering' },
+          { id: 201, name: 'Cat Choize', qty: 30, unit: 'takaran / genggam', type: 'food', note: 'Makanan kering' },
           { id: 202, name: 'Vitamin Kulit', qty: 1, unit: 'botol', type: 'vitamin', note: 'Suplemen bulu' }
         ]
       }
@@ -66,8 +66,8 @@ export default function App() {
   const [feedAmountInput, setFeedAmountInput] = useState(1);
 
   const [newFoodName, setNewFoodName] = useState('');
-  const [newFoodQty, setNewFoodQty] = useState(1);
-  const [newFoodUnit, setNewFoodUnit] = useState('biji');
+  const [newFoodQty, setNewFoodQty] = useState(10);
+  const [newFoodUnit, setNewFoodUnit] = useState('takaran / genggam');
   const [newFoodType, setNewFoodType] = useState('food');
   const [newFoodNote, setNewFoodNote] = useState('');
 
@@ -136,7 +136,7 @@ export default function App() {
 
   const handleFeed = () => {
     if (totalFoodQty <= 0) {
-      alert("Stok makanan kosong! Silakan tambah stok terlebih dahulu.");
+      alert("Stok makanan kosong! Silakan tambah takaran stok terlebih dahulu.");
       return;
     }
 
@@ -144,7 +144,7 @@ export default function App() {
 
     const mainFoodItem = foodItems.find(i => i.type === 'food' || !i.type);
     if (mainFoodItem && mainFoodItem.qty < porsiDiberikan) {
-      alert(`Stok tidak cukup! Sisa ${mainFoodItem.name} tinggal ${mainFoodItem.qty} ${mainFoodItem.unit}, tidak bisa kasih ${porsiDiberikan} porsi.`);
+      alert(`Stok takaran tidak cukup! Sisa ${mainFoodItem.name} tinggal ${mainFoodItem.qty} ${mainFoodItem.unit}, tidak bisa kasih ${porsiDiberikan} porsi.`);
       return;
     }
 
@@ -307,7 +307,7 @@ export default function App() {
     }));
 
     setNewFoodName('');
-    setNewFoodQty(1);
+    setNewFoodQty(10);
     setNewFoodNote('');
   };
 
@@ -384,7 +384,7 @@ export default function App() {
             </div>
             <div className="space-y-1">
               <h2 className="text-base font-bold text-emerald-400">Yummy! {currentPet.name} Kenyang</h2>
-              <p className="text-xs text-slate-300">Stok otomatis berkurang & catatan tersimpan.</p>
+              <p className="text-xs text-slate-300">Stok takaran berkurang & catatan tersimpan.</p>
             </div>
           </div>
         </div>
@@ -576,7 +576,7 @@ export default function App() {
                 <p className="text-xs text-slate-400 font-medium">+ Tambah Stok Khusus {currentPet.name}:</p>
                 
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="text" placeholder="Nama (Mis: Pisang)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
+                  <input type="text" placeholder="Nama (Mis: Cat Choize / Pisang)" value={newFoodName} onChange={(e) => setNewFoodName(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" required />
                   <select value={newFoodType} onChange={(e) => setNewFoodType(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-100">
                     <option value="food">Makanan</option>
                     <option value="vitamin">Vitamin</option>
@@ -584,12 +584,12 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="number" placeholder="Jumlah" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
-                  <input type="text" placeholder="Satuan (biji/kg)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="number" placeholder="Jumlah Takaran" value={newFoodQty} onChange={(e) => setNewFoodQty(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" min="1" />
+                  <input type="text" placeholder="Satuan (takaran/genggam/potong)" value={newFoodUnit} onChange={(e) => setNewFoodUnit(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
 
                 <div>
-                  <input type="text" placeholder="Catatan" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
+                  <input type="text" placeholder="Catatan (Mis: 1 bungkus = 30 takaran)" value={newFoodNote} onChange={(e) => setNewFoodNote(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100" />
                 </div>
 
                 <button type="submit" className="w-full bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs font-medium py-2 rounded-xl border border-emerald-500/30">Simpan ke Stok</button>
@@ -600,7 +600,7 @@ export default function App() {
               <h3 className="text-sm font-semibold text-slate-300 tracking-wide uppercase">Aksi Cepat Harian ({currentPet.name}) 🐾</h3>
               
               <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-800 space-y-2">
-                <label className="text-xs text-slate-400 block">Pilih jumlah porsi / biji yang ingin dicatat:</label>
+                <label className="text-xs text-slate-400 block">Pilih jumlah porsi / takaran yang ingin dicatat:</label>
                 <div className="flex space-x-2">
                   {[1, 2, 3, 4, 5].map((num) => (
                     <button
