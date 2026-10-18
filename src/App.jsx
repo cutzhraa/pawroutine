@@ -6,7 +6,6 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Pastikan setiap anabul memiliki properti foodList agar tidak error
         return parsed.map(p => ({
           ...p,
           foodList: p.foodList || [],
@@ -112,11 +111,22 @@ export default function App() {
     setTimeout(() => setShowAnimation(false), 2000);
 
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const newLog = { time: currentTime, amount: Number(feedAmountInput) };
+    const newLog = { id: Date.now(), time: currentTime, amount: Number(feedAmountInput) };
 
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
         return { ...p, feedLogToday: [...(p.feedLogToday || []), newLog] };
+      }
+      return p;
+    }));
+  };
+
+  // SOLUSI 1: Fitur Hapus/Undo Riwayat Input Makan yang Salah
+  const handleDeleteFeedLog = (logId) => {
+    setPets(prev => prev.map(p => {
+      if (p.id === activePetId) {
+        const updatedLogs = (p.feedLogToday || []).filter(l => l.id !== logId);
+        return { ...p, feedLogToday: updatedLogs };
       }
       return p;
     }));
@@ -502,11 +512,18 @@ export default function App() {
 
               {feedLogs.length > 0 && (
                 <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
-                  <span className="text-[11px] text-slate-400 block font-medium">Riwayat Makan Hari Ini:</span>
+                  <span className="text-[11px] text-slate-400 block font-medium">Riwayat Makan Hari Ini (Klik ✕ untuk batal jika salah input):</span>
                   <div className="flex flex-wrap gap-1.5">
-                    {feedLogs.map((log, idx) => (
-                      <span key={idx} className="text-[11px] bg-slate-800 text-emerald-300 px-2.5 py-1 rounded-lg border border-slate-700">
-                        🕒 {log.time} ({log.amount} porsi)
+                    {feedLogs.map((log) => (
+                      <span key={log.id} className="text-[11px] bg-slate-800 text-emerald-300 px-2.5 py-1 rounded-lg border border-slate-700 flex items-center space-x-1.5">
+                        <span>🕒 {log.time} ({log.amount}p)</span>
+                        <button 
+                          onClick={() => handleDeleteFeedLog(log.id)}
+                          className="text-rose-400 hover:text-rose-300 font-bold ml-1 px-1 rounded bg-rose-500/10"
+                          title="Hapus / Batalkan entri ini"
+                        >
+                          ✕
+                        </button>
                       </span>
                     ))}
                   </div>
