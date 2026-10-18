@@ -62,3 +62,18 @@ npm install
 
 # 4. Jalankan server lokal
 npm run dev
+
+2. Cara Akses Online (PWA Live Demo)
+Kamu bisa langsung menggunakan aplikasi ini secara online atau meng-install-nya sebagai PWA di HP melalui link live-nya:
+👉 https://pawroutine-nu.vercel.app
+
+3. Cara Deploy Sendiri (Vercel)
+Mau deploy project ini sendiri biar punya link online pribadi? Gampang banget:
+
+Push repository kamu ke GitHub.
+
+Buka Vercel, lalu klik Add New Project.
+
+Import repository pawroutine.
+
+Vercel bakal otomatis mendeteksi settingan Vite React, tinggal klik Deploy! Selesai dalam 1 menit.
