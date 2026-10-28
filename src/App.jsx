@@ -398,7 +398,7 @@ export default function App() {
             </div>
             <button 
               onClick={() => setShowAddPetModal(true)}
-              className="text-xs bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 px-3 py-1.5 rounded-xl border border-emerald-500/30 font-medium transition active:scale-95"
+              className="text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3.5 py-2 rounded-xl shadow transition active:scale-95"
             >
               + Anabul Baru
             </button>
@@ -425,18 +425,12 @@ export default function App() {
         </div>
 
         {pets.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-4 shadow-xl">
+          <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-8 text-center space-y-4 shadow-xl backdrop-blur-sm">
             <span className="text-5xl block">🐾</span>
             <div className="space-y-1">
               <h2 className="text-base font-bold text-emerald-400">Belum Ada Anabul</h2>
-              <p className="text-xs text-slate-400">Silakan tambahkan profil peliharaan pertama kamu untuk mulai melacak rutinitas harian.</p>
+              <p className="text-xs text-slate-400">Silakan tambahkan profil peliharaan pertama kamu melalui tombol di atas untuk mulai melacak rutinitas harian.</p>
             </div>
-            <button 
-              onClick={() => setShowAddPetModal(true)}
-              className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition"
-            >
-              + Tambah Anabul Pertama
-            </button>
           </div>
         ) : (
           <>
@@ -688,7 +682,7 @@ export default function App() {
                   )}
                 </div>
 
-                {/* INVENTARIS STOK MAKANAN & VITAMIN (Gaya Modern & Estetik) */}
+                {/* INVENTARIS STOK MAKANAN & VITAMIN */}
                 <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-5 shadow-xl space-y-4 backdrop-blur-sm">
                   <div className="flex items-center space-x-2">
                     <span className="text-base">📦</span>
@@ -727,7 +721,6 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* Form Tambah Stok Modern */}
                   <form onSubmit={handleAddCustomFood} className="pt-3 border-t border-slate-800/80 space-y-3">
                     <p className="text-xs text-slate-400 font-semibold">+ Tambah Stok Makanan Baru:</p>
                     
