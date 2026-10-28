@@ -1,84 +1,50 @@
-# 🐾 PawRoutine
+# PawRoutine
 
-> *"A Progressive Web App (PWA) built to solve my own daily struggles in taking care of exotic pets and lovely anabuls—managing feeding routines, vitamin schedules, inventory stock tracking, and health milestones without the hassle of forgetting!"*
+PawRoutine adalah aplikasi web untuk mencatat rutinitas perawatan beberapa hewan peliharaan. Data disimpan di browser yang digunakan, sehingga setiap perangkat memiliki penyimpanannya sendiri.
 
-[![React](https://img.shields.io/badge/React.js-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-Bundler-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev/)
-[![PWA](https://img.shields.io/badge/PWA-Ready-success?style=for-the-badge&logo=pwa)](https://web.dev/progressive-web-apps/)
+## Fitur
 
----
+- Buat dan kelola profil beberapa hewan, termasuk jenis, foto, dan catatan perawatan.
+- Catat pemberian makan, air, dan vitamin untuk setiap hewan.
+- Kelola stok makanan dan vitamin; stok makanan berkurang saat pemberian makan dicatat.
+- Catat perkiraan umur, jadwal mandi, dan obat cacing.
+- Rekap aktivitas harian ke kalender riwayat dan pulihkan rekap yang tidak sengaja dibuat.
+- Ekspor dan pulihkan data melalui file JSON.
+- Antarmuka responsif dengan manifest aplikasi untuk pemasangan di perangkat yang mendukungnya.
 
-## 💡 The Story / Latar Belakang
+## Teknologi
 
-Pernah nggak sih, melihara peliharaan kesayangan tapi malah **lupa kapan terakhir kali dikasih makan** di siang hari, pas sore-sore sadar kalau **stok makanan di rumah udah habis**, belum lagi lupa kapan jadwal minum vitamin dan obat cacing terakhir kali? 
+- React 19
+- Vite 8
+- Tailwind CSS 4
+- Penyimpanan lokal browser (`localStorage`)
 
-Dari pengalaman nyata dan rasa gemas karena sering pelupa itulah **PawRoutine** lahir! Aplikasi web interaktif ini dirancang khusus untuk merapikan seluruh rutinitas harian hewan peliharaan langsung dari genggaman HP atau laptop. **Mulai dari keadaan bersih (polos tanpa data bawaan)**, kamu bebas menambahkan profil anabul sesuai peliharaan aslimu di rumah!
+## Menjalankan secara lokal
 
----
-
-## ✨ Key Features (Fitur Utama)
-
-1. **Multi-Pet Support (Manajemen Banyak Anabul):** 
-   - Keadaan awal bersih/polos, bebas menambahkan peliharaan (musang, kucing, anjing, hamster, burung, dll.) dengan profil dan foto kustom masing-masing.
-2. **Per-Pet Food Inventory (Stok Makanan Spesifik):** 
-   - Setiap anabul punya daftar persediaan makanannya sendiri (tidak tercampur), lengkap dengan sistem pantau jumlah fisik dan jenis satuannya.
-3. **Daily Feeding Log & Cute Sound Feedback:** 
-   - Tombol simpel "Catat Kasih Makan" disertai riwayat jam makan, lengkap dengan animasi dan efek suara gemes saat ditekan!
-4. **Health & Milestone Journal:** 
-   - Catatan interaktif untuk estimasi umur, jadwal mandi (yang bisa disinkronkan langsung dengan satu klik), hingga riwayat obat cacing.
-5. **Calendar History & Undo Log (Kalender & Pembatalan Rekap):** 
-   - Fitur rekap harian untuk melihat ringkasan aktivitas di hari sebelumnya, lengkap dengan tombol **Batalkan** jika rekap harian tidak sengaja terpencet.
-6. **Data Backup & Restore (JSON):** 
-   - Fitur aman berbasis lokal yang memungkinkan kamu mengunduh dan memulihkan seluruh data riwayat perawatan kapan pun dibutuhkan.
-7. **PWA Ready:** 
-   - Bisa di-*install* langsung ke *Home Screen* HP layaknya aplikasi native tanpa perlu mampir ke Play Store.
-
----
-
-## 🛠️ Tech Stack
-
-- **Frontend:** React.js, Vite
-- **Styling:** Tailwind CSS (v4)
-- **State & Storage:** React Hooks (`useState`, `useEffect`, `useRef`), LocalStorage API
-- **Audio & Visual:** Web Audio API (Synthetic cute sound generator), CSS Animations
-
----
-
-## 🚀 Getting Started & Deployment
-
-### 1. Cara Menjalankan Lokal (Development)
-Kalau kamu mau *clone* dan *running* proyek ini secara lokal di komputermu, ikuti langkah ini:
+Persyaratan: Node.js dan npm.
 
 ```bash
-# 1. Clone repository ini
-git clone [https://github.com/cutzhrza/pawroutine.git](https://github.com/cutzhrza/pawroutine.git)
-
-# 2. Masuk ke direktori proyek
+git clone https://github.com/cutzhraa/pawroutine.git
 cd pawroutine
-
-# 3. Install dependencies
 npm install
-
-# 4. Jalankan server lokal
 npm run dev
-
 ```
 
-### 2. Cara Akses Online (PWA Live Demo)
+Buka alamat lokal yang ditampilkan Vite di terminal.
 
-Kamu bisa langsung menggunakan aplikasi ini secara online atau meng-*install*-nya sebagai PWA di HP melalui link live-nya:
-👉 **[https://pawroutineku.vercel.app](https://pawroutineku.vercel.app)**
+## Build produksi
 
-### 3. Cara Deploy Sendiri (Vercel)
-
-Mau deploy project ini sendiri biar punya link online pribadi? Gampang banget:
-
-1. Push repository kamu ke GitHub.
-2. Buka [Vercel](https://vercel.com/), lalu klik **Add New Project**.
-3. Import repository `pawroutine`.
-4. Vercel bakal otomatis mendeteksi settingan Vite React, tinggal klik **Deploy**! Selesai dalam 1 menit.
-
+```bash
+npm run build
+npm run preview
 ```
 
-```
+Vite menghasilkan berkas statis di direktori `dist/`. Perintah preview menyajikan build tersebut secara lokal.
+
+## Deploy
+
+Proyek ini menggunakan Vite tanpa konfigurasi platform deploy khusus. Hubungkan repository ke layanan hosting situs statis, gunakan `npm run build` sebagai perintah build, dan `dist` sebagai direktori output. Untuk Vercel, impor repository dari dashboard Vercel dan konfirmasikan pengaturan build tersebut.
+
+## Penyimpanan dan backup
+
+Data profil, stok, dan riwayat tersimpan di `localStorage` browser. Data tidak tersinkron antarperangkat atau antar-browser. Gunakan menu **Backup** di aplikasi untuk mengunduh backup JSON secara berkala dan memulihkannya bila diperlukan. Menghapus data browser dapat menghapus data PawRoutine yang tersimpan di sana.
