@@ -223,11 +223,42 @@ export default function App() {
     }));
   };
 
+  // REVISI: Menghapus log makan sekaligus mengembalikan (refund) stok porsi makanan
   const handleDeleteFeedLog = (logId) => {
+    const targetLog = feedLogs.find(l => l.id === logId);
+    if (!targetLog) return;
+
+    const refundAmount = targetLog.amount || 1;
+
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
         const updatedLogs = (p.feedLogToday || []).filter(l => l.id !== logId);
-        return { ...p, feedLogToday: updatedLogs };
+        
+        let remainingToRefund = refundAmount;
+        const updatedFoodList = (p.foodList || []).map(item => {
+          if ((item.type === 'food' || !item.type) && remainingToRefund > 0) {
+            const currentPortions = item.totalPortions !== undefined ? item.totalPortions : item.qty * 12;
+            const addedPortions = remainingToRefund; // Karena asumsi 1 porsi = 1 satuan terkecil atau di-add langsung
+            remainingToRefund = 0; // Masukkan refund ke item pertama makanan yang ketemu
+
+            const newTotalPortions = currentPortions + addedPortions;
+            // Hitung kembali qty fisik berdasarkan proporsi 12 porsi per 1 satuan fisik
+            const newPhysicalQty = newTotalPortions / 12;
+
+            return {
+              ...item,
+              totalPortions: newTotalPortions,
+              qty: Number(newPhysicalQty.toFixed(2))
+            };
+          }
+          return item;
+        });
+
+        return { 
+          ...p, 
+          feedLogToday: updatedLogs,
+          foodList: updatedFoodList
+        };
       }
       return p;
     }));
@@ -500,7 +531,7 @@ export default function App() {
 
       <div className="max-w-md w-full space-y-6">
         
-        {/* Header atas (Revisi teks agar sesuai kenyataan PWA Tracker) */}
+        {/* Header atas */}
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg space-y-3">
           <div className="flex items-center justify-between">
             <div>
@@ -686,7 +717,7 @@ export default function App() {
 
                   {feedLogs.length > 0 && (
                     <div className="pt-1 space-y-1.5">
-                      <span className="text-[10px] text-slate-400 font-medium block">Log Makan Hari Ini:</span>
+                      <span className="text-[10px] text-slate-400 font-medium block">Log Makan Hari Ini (Klik ✕ untuk batal & refund stok):</span>
                       <div className="flex flex-wrap gap-1.5">
                         {feedLogs.map((log) => (
                           <span key={log.id} className="text-[11px] bg-slate-950 text-emerald-300 px-3 py-1 rounded-xl border border-slate-800 flex items-center space-x-2 shadow-inner">
@@ -695,7 +726,7 @@ export default function App() {
                             <button 
                               onClick={() => handleDeleteFeedLog(log.id)}
                               className="text-rose-400 hover:text-rose-300 font-bold ml-0.5 px-1 rounded bg-rose-500/10"
-                              title="Hapus"
+                              title="Batalkan & Kembalikan Stok"
                             >
                               ✕
                             </button>
