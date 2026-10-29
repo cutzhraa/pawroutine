@@ -55,7 +55,6 @@ export default function App() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
-        // Cek jika ada waiting worker saat halaman dimuat
         if (registration.waiting) {
           setWaitingWorker(registration.waiting);
           setUpdateAvailable(true);
@@ -67,7 +66,6 @@ export default function App() {
             installingWorker.onstatechange = () => {
               if (installingWorker.state === 'installed') {
                 if (navigator.serviceWorker.controller) {
-                  // Ada update baru tersedia setelah deploy
                   setWaitingWorker(installingWorker);
                   setUpdateAvailable(true);
                 }
@@ -86,7 +84,7 @@ export default function App() {
     window.location.reload();
   };
 
-  // FITUR OTOMATIS: Cek tanggal setiap kali aplikasi dibuka / direfresh untuk reset harian
+  // Auto-reset harian berdasarkan tanggal
   useEffect(() => {
     const todayKey = new Date().toISOString().slice(0, 10);
     const lastOpenedDate = localStorage.getItem('pawroutine_last_date');
@@ -131,7 +129,6 @@ export default function App() {
     }
   }, [activePetId]);
 
-  // Sinkronisasi data jurnal ketika anabul aktif berubah
   useEffect(() => {
     if (currentPet) {
       setTempJournal({
@@ -188,7 +185,8 @@ export default function App() {
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 2000);
 
-    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // REVISI JAM: Menggunakan format 24 Jam (id-ID dengan hour12: false)
+    const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
     const labelMakan = currentPet.species === 'Musang / Civet' ? `${jumlahBuah} Buah` : `${jumlahBuah} Porsi`;
     const newLog = { id: Date.now(), time: currentTime, amount: jumlahBuah, label: labelMakan };
 
@@ -366,7 +364,6 @@ export default function App() {
     }));
   };
 
-  // Fungsi Tambah Stok dengan FITUR AUTO-MERGE (Digabung jika nama & tipe sama)
   const handleAddCustomFood = (e) => {
     e.preventDefault();
     if (!newFoodName || !currentPet) return;
@@ -377,13 +374,11 @@ export default function App() {
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
         const existingFoodList = p.foodList || [];
-        // Cek apakah ada makanan dengan nama dan tipe yang sama persis (case insensitive)
         const existingIndex = existingFoodList.findIndex(
           item => item.name.trim().toLowerCase() === newFoodName.trim().toLowerCase() && item.type === newFoodType
         );
 
         if (existingIndex > -1) {
-          // Gabung ke item yang sudah ada
           const updatedList = [...existingFoodList];
           const targetItem = updatedList[existingIndex];
           const newQty = targetItem.qty + physicalQty;
@@ -397,7 +392,6 @@ export default function App() {
           };
           return { ...p, foodList: updatedList };
         } else {
-          // Buat item baru jika belum ada
           const newItem = { 
             id: Date.now(), 
             name: newFoodName, 
@@ -469,7 +463,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-4 sm:p-8 font-sans pb-28 relative overflow-x-hidden">
       
-      {/* Tombol Update Now PWA (Hanya muncul jika ada versi deploy baru) */}
+      {/* Tombol Update Now PWA */}
       {updateAvailable && (
         <div className="fixed top-4 z-50 animate-bounce">
           <button
@@ -481,10 +475,13 @@ export default function App() {
         </div>
       )}
 
+      {/* REVISI ANIMASI KLIK MAKAN: Dipercantik dengan efek scale bounce & floating emoji */}
       {showAnimation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
-          <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-4 max-w-xs w-full">
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-500/30 overflow-hidden flex items-center justify-center text-4xl shadow-inner">
+          <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-4 max-w-xs w-full animate-bounce">
+            <div className="relative w-20 h-20 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-500/30 overflow-hidden flex items-center justify-center text-4xl shadow-inner">
+              <span className="absolute -top-2 -right-2 text-xl animate-ping">✨</span>
+              <span className="absolute -bottom-2 -left-2 text-xl animate-bounce">🍌</span>
               {currentPet?.photo ? (
                 <img src={currentPet.photo} alt="Anabul" className="w-full h-full object-cover" />
               ) : (
@@ -492,7 +489,7 @@ export default function App() {
               )}
             </div>
             <div className="space-y-1">
-              <h2 className="text-base font-bold text-emerald-400">Yummy! {currentPet?.name} Kenyang</h2>
+              <h2 className="text-base font-bold text-emerald-400">Yummy! {currentPet?.name} Kenyang 🥳</h2>
               <p className="text-xs text-slate-300">Stok otomatis berkurang secara akurat.</p>
             </div>
           </div>
