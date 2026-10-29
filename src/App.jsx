@@ -488,18 +488,13 @@ export default function App() {
   const historyList = currentPet ? (currentPet.historyDays || []) : [];
   const isMusang = currentPet?.species === 'Musang / Civet';
 
-  // PERBAIKAN RENTANG JAM NYATA:
-  // Sesi Pagi: jam 04:00 - 10:59
-  // Sesi Siang/Sore: jam 11:00 - 16:59
-  // Sesi Malam: jam 17:00 (17.00 pas/lebih) sampai jam 03:59 subuh
-  const hasMorningFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 4 && l.hour < 11) : false);
-  const hasAfternoonFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 11 && l.hour < 17) : false);
-  const hasNightFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 17 || l.hour < 4) : false);
-
-  const totalLogsCount = feedLogs.length;
-  const isMorningDone = hasMorningFeed || (totalLogsCount >= 1 && !hasAfternoonFeed && !hasNightFeed);
-  const isAfternoonDone = hasAfternoonFeed || totalLogsCount >= 2;
-  const isNightDone = hasNightFeed || totalLogsCount >= 3;
+  // DETEKSI SESI 100% BERDASARKAN JAM NYATA (TANPA FALLBACK ACAK)
+  // - Pagi: 04:00 - 10:59
+  // - Siang/Sore: 11:00 - 16:59
+  // - Malam: 17:00 - 03:59
+  const isMorningDone = feedLogs.some(l => l.hour !== undefined && l.hour >= 4 && l.hour < 11);
+  const isAfternoonDone = feedLogs.some(l => l.hour !== undefined && l.hour >= 11 && l.hour < 17);
+  const isNightDone = feedLogs.some(l => l.hour !== undefined && (l.hour >= 17 || l.hour < 4));
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-4 sm:p-8 font-sans pb-28 relative overflow-x-hidden">
@@ -516,7 +511,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ANIMASI GAYA "Floating Emoji & Scale Burst" - Teks diubah jadi Yammiee */}
+      {/* ANIMASI GAYA "Floating Emoji & Scale Burst" - Teks "Yammiee [Nama] Kenyang" */}
       {showAnimation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
           <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-3 max-w-xs w-full animate-bounce">
