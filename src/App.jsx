@@ -185,10 +185,10 @@ export default function App() {
     setShowAnimation(true);
     setTimeout(() => setShowAnimation(false), 2000);
 
-    // Format Jam 24 Jam (id-ID dengan hour12: false)
-    const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const now = new Date();
+    const currentTime = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
     const labelMakan = currentPet.species === 'Musang / Civet' ? `${jumlahBuah} Buah` : `${jumlahBuah} Porsi`;
-    const newLog = { id: Date.now(), time: currentTime, amount: jumlahBuah, label: labelMakan };
+    const newLog = { id: Date.now(), time: currentTime, amount: jumlahBuah, label: labelMakan, hour: now.getHours() };
 
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
@@ -223,7 +223,6 @@ export default function App() {
     }));
   };
 
-  // REVISI: Menghapus log makan sekaligus mengembalikan (refund) stok porsi makanan
   const handleDeleteFeedLog = (logId) => {
     const targetLog = feedLogs.find(l => l.id === logId);
     if (!targetLog) return;
@@ -238,11 +237,10 @@ export default function App() {
         const updatedFoodList = (p.foodList || []).map(item => {
           if ((item.type === 'food' || !item.type) && remainingToRefund > 0) {
             const currentPortions = item.totalPortions !== undefined ? item.totalPortions : item.qty * 12;
-            const addedPortions = remainingToRefund; // Karena asumsi 1 porsi = 1 satuan terkecil atau di-add langsung
-            remainingToRefund = 0; // Masukkan refund ke item pertama makanan yang ketemu
+            const addedPortions = remainingToRefund;
+            remainingToRefund = 0;
 
             const newTotalPortions = currentPortions + addedPortions;
-            // Hitung kembali qty fisik berdasarkan proporsi 12 porsi per 1 satuan fisik
             const newPhysicalQty = newTotalPortions / 12;
 
             return {
@@ -487,9 +485,22 @@ export default function App() {
   };
 
   const feedLogs = currentPet ? (currentPet.feedLogToday || []) : [];
-  const totalMakanHariIni = feedLogs.length;
   const historyList = currentPet ? (currentPet.historyDays || []) : [];
   const isMusang = currentPet?.species === 'Musang / Civet';
+
+  // DETEKSI SESI BERDASARKAN JAM NYATA (REAL-TIME CLOCK)
+  // Sesi Pagi: jam 04:00 - 10:59
+  // Sesi Siang/Sore: jam 11:00 - 16:59
+  // Sesi Malam: jam 17:00 - 03:59
+  const hasMorningFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 4 && l.hour < 11) : false);
+  const hasAfternoonFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 11 && l.hour < 17) : false);
+  const hasNightFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 17 || l.hour < 4) : false);
+
+  // Fallback jika log lama belum punya properti 'hour'
+  const totalLogsCount = feedLogs.length;
+  const isMorningDone = hasMorningFeed || (totalLogsCount >= 1 && !hasAfternoonFeed && !hasNightFeed);
+  const isAfternoonDone = hasAfternoonFeed || totalLogsCount >= 2;
+  const isNightDone = hasNightFeed || totalLogsCount >= 3;
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-4 sm:p-8 font-sans pb-28 relative overflow-x-hidden">
@@ -635,26 +646,26 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* INDIKATOR PENGINGAT 3x SEHARI */}
+                {/* INDIKATOR PENGINGAT 3x SEHARI (BERDASARKAN WAKTU NYATA) */}
                 <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-4 shadow-xl space-y-2.5 backdrop-blur-sm">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold text-slate-400 tracking-wider uppercase">⏰ Pengingat Makan 3x Sehari</h3>
                     <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium">
-                      Standar Perawatan
+                      Auto Sesuai Jam
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className={`p-2.5 rounded-2xl border text-xs ${feedLogs.length >= 1 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+                    <div className={`p-2.5 rounded-2xl border text-xs ${isMorningDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
                       <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 1</span>
-                      <span>🌅 Pagi {feedLogs.length >= 1 ? '✅' : '⏳'}</span>
+                      <span>🌅 Pagi {isMorningDone ? '✅' : '⏳'}</span>
                     </div>
-                    <div className={`p-2.5 rounded-2xl border text-xs ${feedLogs.length >= 2 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+                    <div className={`p-2.5 rounded-2xl border text-xs ${isAfternoonDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
                       <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 2</span>
-                      <span>☀️ Siang/Sore {feedLogs.length >= 2 ? '✅' : '⏳'}</span>
+                      <span>☀️ Siang/Sore {isAfternoonDone ? '✅' : '⏳'}</span>
                     </div>
-                    <div className={`p-2.5 rounded-2xl border text-xs ${feedLogs.length >= 3 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+                    <div className={`p-2.5 rounded-2xl border text-xs ${isNightDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
                       <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 3</span>
-                      <span>🌙 Malam {feedLogs.length >= 3 ? '✅' : '⏳'}</span>
+                      <span>🌙 Malam {isNightDone ? '✅' : '⏳'}</span>
                     </div>
                   </div>
                 </div>
