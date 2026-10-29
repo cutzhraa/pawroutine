@@ -47,6 +47,46 @@ export default function App() {
 
   const currentPet = pets.find(p => p.id === activePetId) || pets[0];
 
+  // FITUR OTOMATIS: Cek tanggal setiap kali aplikasi dibuka / direfresh
+  useEffect(() => {
+    const todayKey = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
+    const lastOpenedDate = localStorage.getItem('pawroutine_last_date');
+
+    if (lastOpenedDate && lastOpenedDate !== todayKey) {
+      // Tanggal sudah berganti! Lakukan auto-reset untuk semua pet yang punya log aktif
+      setPets(prevPets => prevPets.map(p => {
+        const logs = p.feedLogToday || [];
+        // Jika ada aktivitas atau status centang kemarin, rekap ke history
+        if (logs.length > 0 || p.waterGiven || p.vitaminGiven) {
+          // Format tanggal cantik untuk riwayat (misalnya dari lastOpenedDate)
+          const dateObj = new Date(lastOpenedDate);
+          const formattedDateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' });
+          
+          const daySummary = { 
+            id: Date.now() + Math.random(), 
+            date: formattedDateStr, 
+            totalFeed: logs.length, 
+            logs: logs, 
+            vitamin: p.vitaminGiven,
+            water: p.waterGiven 
+          };
+
+          return {
+            ...p,
+            feedLogToday: [],
+            vitaminGiven: false,
+            waterGiven: false,
+            historyDays: [daySummary, ...(p.historyDays || [])]
+          };
+        }
+        return p;
+      }));
+    }
+
+    // Simpan tanggal hari ini sebagai referensi terakhir
+    localStorage.setItem('pawroutine_last_date', todayKey);
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('pawroutine_pets', JSON.stringify(pets));
   }, [pets]);
@@ -801,7 +841,7 @@ export default function App() {
                 
                 {historyList.length === 0 ? (
                   <div className="text-center py-8 text-xs text-slate-500">
-                    Belum ada riwayat hari sebelumnya. Klik tombol "Selesaikan Hari Ini" di dashboard untuk merekap data harian!
+                    Belum ada riwayat hari sebelumnya. Rekap harian akan terisi otomatis saat tanggal berganti!
                   </div>
                 ) : (
                   <div className="space-y-3">
