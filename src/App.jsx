@@ -29,6 +29,10 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAnimation, setShowAnimation] = useState(false);
 
+  // State untuk PWA Update Notification
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [waitingWorker, setWaitingWorker] = useState(null);
+
   const [newFoodName, setNewFoodName] = useState('');
   const [newFoodQty, setNewFoodQty] = useState(1);
   const [newFoodUnit, setNewFoodUnit] = useState('sisir');
@@ -47,18 +51,50 @@ export default function App() {
 
   const currentPet = pets.find(p => p.id === activePetId) || pets[0];
 
-  // FITUR OTOMATIS: Cek tanggal setiap kali aplikasi dibuka / direfresh
+  // PWA Service Worker Listener untuk Update Button
   useEffect(() => {
-    const todayKey = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then((registration) => {
+        // Cek jika ada waiting worker saat halaman dimuat
+        if (registration.waiting) {
+          setWaitingWorker(registration.waiting);
+          setUpdateAvailable(true);
+        }
+
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          if (installingWorker) {
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed') {
+                if (navigator.serviceWorker.controller) {
+                  // Ada update baru tersedia setelah deploy
+                  setWaitingWorker(installingWorker);
+                  setUpdateAvailable(true);
+                }
+              }
+            };
+          }
+        };
+      });
+    }
+  }, []);
+
+  const handleUpdateApp = () => {
+    if (waitingWorker) {
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    }
+    window.location.reload();
+  };
+
+  // FITUR OTOMATIS: Cek tanggal setiap kali aplikasi dibuka / direfresh untuk reset harian
+  useEffect(() => {
+    const todayKey = new Date().toISOString().slice(0, 10);
     const lastOpenedDate = localStorage.getItem('pawroutine_last_date');
 
     if (lastOpenedDate && lastOpenedDate !== todayKey) {
-      // Tanggal sudah berganti! Lakukan auto-reset untuk semua pet yang punya log aktif
       setPets(prevPets => prevPets.map(p => {
         const logs = p.feedLogToday || [];
-        // Jika ada aktivitas atau status centang kemarin, rekap ke history
         if (logs.length > 0 || p.waterGiven || p.vitaminGiven) {
-          // Format tanggal cantik untuk riwayat (misalnya dari lastOpenedDate)
           const dateObj = new Date(lastOpenedDate);
           const formattedDateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' });
           
@@ -82,8 +118,6 @@ export default function App() {
         return p;
       }));
     }
-
-    // Simpan tanggal hari ini sebagai referensi terakhir
     localStorage.setItem('pawroutine_last_date', todayKey);
   }, []);
 
@@ -97,6 +131,7 @@ export default function App() {
     }
   }, [activePetId]);
 
+  // Sinkronisasi data jurnal ketika anabul aktif berubah
   useEffect(() => {
     if (currentPet) {
       setTempJournal({
@@ -105,7 +140,7 @@ export default function App() {
         lastDeworm: currentPet.lastDeworm || ''
       });
     }
-  }, [activePetId]);
+  }, [activePetId, pets]);
 
   const playCuteSound = () => {
     try {
@@ -219,7 +254,9 @@ export default function App() {
 
   const handleBathDone = () => {
     playCuteSound();
-    setPets(prev => prev.map(p => p.id === activePetId ? { ...p, lastBath: 'Baru saja (Hari ini)' } : p));
+    const todayFormatted = 'Baru saja (Hari ini)';
+    setPets(prev => prev.map(p => p.id === activePetId ? { ...p, lastBath: todayFormatted } : p));
+    setTempJournal(prev => ({ ...prev, lastBath: todayFormatted }));
   };
 
   const handleSaveJournal = (e) => {
@@ -329,6 +366,7 @@ export default function App() {
     }));
   };
 
+  // Fungsi Tambah Stok dengan FITUR AUTO-MERGE (Digabung jika nama & tipe sama)
   const handleAddCustomFood = (e) => {
     e.preventDefault();
     if (!newFoodName || !currentPet) return;
@@ -336,19 +374,41 @@ export default function App() {
     const physicalQty = Number(newFoodQty);
     const calculatedTotalPortions = physicalQty * 12;
 
-    const newItem = { 
-      id: Date.now(), 
-      name: newFoodName, 
-      qty: physicalQty, 
-      unit: newFoodUnit, 
-      totalPortions: calculatedTotalPortions,
-      type: newFoodType, 
-      note: newFoodNote 
-    };
-    
     setPets(prev => prev.map(p => {
       if (p.id === activePetId) {
-        return { ...p, foodList: [...(p.foodList || []), newItem] };
+        const existingFoodList = p.foodList || [];
+        // Cek apakah ada makanan dengan nama dan tipe yang sama persis (case insensitive)
+        const existingIndex = existingFoodList.findIndex(
+          item => item.name.trim().toLowerCase() === newFoodName.trim().toLowerCase() && item.type === newFoodType
+        );
+
+        if (existingIndex > -1) {
+          // Gabung ke item yang sudah ada
+          const updatedList = [...existingFoodList];
+          const targetItem = updatedList[existingIndex];
+          const newQty = targetItem.qty + physicalQty;
+          const newTotalPortions = (targetItem.totalPortions !== undefined ? targetItem.totalPortions : targetItem.qty * 12) + calculatedTotalPortions;
+
+          updatedList[existingIndex] = {
+            ...targetItem,
+            qty: newQty,
+            totalPortions: newTotalPortions,
+            note: newFoodNote ? newFoodNote : targetItem.note
+          };
+          return { ...p, foodList: updatedList };
+        } else {
+          // Buat item baru jika belum ada
+          const newItem = { 
+            id: Date.now(), 
+            name: newFoodName, 
+            qty: physicalQty, 
+            unit: newFoodUnit, 
+            totalPortions: calculatedTotalPortions,
+            type: newFoodType, 
+            note: newFoodNote 
+          };
+          return { ...p, foodList: [...existingFoodList, newItem] };
+        }
       }
       return p;
     }));
@@ -409,6 +469,18 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center p-4 sm:p-8 font-sans pb-28 relative overflow-x-hidden">
       
+      {/* Tombol Update Now PWA (Hanya muncul jika ada versi deploy baru) */}
+      {updateAvailable && (
+        <div className="fixed top-4 z-50 animate-bounce">
+          <button
+            onClick={handleUpdateApp}
+            className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-2xl shadow-xl border border-emerald-300 flex items-center space-x-2 transition active:scale-95"
+          >
+            <span>🚀 Update Versi Baru Tersedia! Klik Di Sini</span>
+          </button>
+        </div>
+      )}
+
       {showAnimation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
           <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-4 max-w-xs w-full">
@@ -762,7 +834,7 @@ export default function App() {
                   )}
 
                   <form onSubmit={handleAddCustomFood} className="pt-3 border-t border-slate-800/80 space-y-3">
-                    <p className="text-xs text-slate-400 font-semibold">+ Tambah Stok Makanan Baru:</p>
+                    <p className="text-xs text-slate-400 font-semibold">+ Tambah Stok Makanan Baru (Auto-Merge jika nama sama):</p>
                     
                     <div className="grid grid-cols-2 gap-2.5">
                       <input 
