@@ -488,15 +488,14 @@ export default function App() {
   const historyList = currentPet ? (currentPet.historyDays || []) : [];
   const isMusang = currentPet?.species === 'Musang / Civet';
 
-  // DETEKSI SESI BERDASARKAN JAM NYATA (REAL-TIME CLOCK)
+  // PERBAIKAN RENTANG JAM NYATA:
   // Sesi Pagi: jam 04:00 - 10:59
   // Sesi Siang/Sore: jam 11:00 - 16:59
-  // Sesi Malam: jam 17:00 - 03:59
+  // Sesi Malam: jam 17:00 (17.00 pas/lebih) sampai jam 03:59 subuh
   const hasMorningFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 4 && l.hour < 11) : false);
   const hasAfternoonFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 11 && l.hour < 17) : false);
   const hasNightFeed = feedLogs.some(l => l.hour !== undefined ? (l.hour >= 17 || l.hour < 4) : false);
 
-  // Fallback jika log lama belum punya properti 'hour'
   const totalLogsCount = feedLogs.length;
   const isMorningDone = hasMorningFeed || (totalLogsCount >= 1 && !hasAfternoonFeed && !hasNightFeed);
   const isAfternoonDone = hasAfternoonFeed || totalLogsCount >= 2;
@@ -517,10 +516,10 @@ export default function App() {
         </div>
       )}
 
-      {/* ANIMASI GAYA "Floating Emoji & Scale Burst" */}
+      {/* ANIMASI GAYA "Floating Emoji & Scale Burst" - Teks diubah jadi Yammiee */}
       {showAnimation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
-          <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-4 max-w-xs w-full animate-bounce">
+          <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-3 max-w-xs w-full animate-bounce">
             <div className="relative w-20 h-20 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-500/30 overflow-hidden flex items-center justify-center text-4xl shadow-inner">
               <span className="absolute -top-3 -right-2 text-2xl animate-ping">✨</span>
               <span className="absolute -bottom-2 -left-2 text-2xl animate-bounce">
@@ -532,9 +531,8 @@ export default function App() {
                 <span>🐾</span>
               )}
             </div>
-            <div className="space-y-1">
-              <h2 className="text-base font-bold text-emerald-400">Nyem-nyem! {currentPet?.name} Lahap Banget 🥳</h2>
-              <p className="text-xs text-slate-300">Porsi makan berhasil dicatat & stok terupdate.</p>
+            <div>
+              <h2 className="text-base font-bold text-emerald-400">Yammiee {currentPet?.name} Kenyang</h2>
             </div>
           </div>
         </div>
@@ -646,26 +644,47 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* INDIKATOR PENGINGAT 3x SEHARI (BERDASARKAN WAKTU NYATA) */}
-                <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-4 shadow-xl space-y-2.5 backdrop-blur-sm">
+                {/* INDIKATOR PENGINGAT 3x SEHARI (GAYA MODERN TIMELINE) */}
+                <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-5 shadow-xl space-y-3.5 backdrop-blur-sm">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold text-slate-400 tracking-wider uppercase">⏰ Pengingat Makan 3x Sehari</h3>
-                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium">
-                      Auto Sesuai Jam
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm">⏰</span>
+                      <h3 className="text-xs font-bold text-slate-300 tracking-wider uppercase">Pengingat Makan 3x Sehari</h3>
+                    </div>
+                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20 font-semibold">
+                      Auto Jam Real-Time
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className={`p-2.5 rounded-2xl border text-xs ${isMorningDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
-                      <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 1</span>
-                      <span>🌅 Pagi {isMorningDone ? '✅' : '⏳'}</span>
+
+                  <div className="grid grid-cols-3 gap-2.5 text-center">
+                    <div className={`p-3 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center space-y-1 ${
+                      isMorningDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 shadow-lg shadow-emerald-500/5' : 'bg-slate-950/60 border-slate-800/80 text-slate-400'
+                    }`}>
+                      <span className="text-base">🌅</span>
+                      <span className="text-[10px] font-medium tracking-wide text-slate-300">Pagi</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isMorningDone ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-500'}`}>
+                        {isMorningDone ? 'Selesai ✓' : 'Menunggu'}
+                      </span>
                     </div>
-                    <div className={`p-2.5 rounded-2xl border text-xs ${isAfternoonDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
-                      <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 2</span>
-                      <span>☀️ Siang/Sore {isAfternoonDone ? '✅' : '⏳'}</span>
+
+                    <div className={`p-3 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center space-y-1 ${
+                      isAfternoonDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 shadow-lg shadow-emerald-500/5' : 'bg-slate-950/60 border-slate-800/80 text-slate-400'
+                    }`}>
+                      <span className="text-base">☀️</span>
+                      <span className="text-[10px] font-medium tracking-wide text-slate-300">Siang</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isAfternoonDone ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-500'}`}>
+                        {isAfternoonDone ? 'Selesai ✓' : 'Menunggu'}
+                      </span>
                     </div>
-                    <div className={`p-2.5 rounded-2xl border text-xs ${isNightDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
-                      <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 3</span>
-                      <span>🌙 Malam {isNightDone ? '✅' : '⏳'}</span>
+
+                    <div className={`p-3 rounded-2xl border transition-all duration-300 flex flex-col items-center justify-center space-y-1 ${
+                      isNightDone ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 shadow-lg shadow-emerald-500/5' : 'bg-slate-950/60 border-slate-800/80 text-slate-400'
+                    }`}>
+                      <span className="text-base">🌙</span>
+                      <span className="text-[10px] font-medium tracking-wide text-slate-300">Malam</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isNightDone ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-900 text-slate-500'}`}>
+                        {isNightDone ? 'Selesai ✓' : 'Menunggu'}
+                      </span>
                     </div>
                   </div>
                 </div>
