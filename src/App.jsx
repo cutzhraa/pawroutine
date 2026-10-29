@@ -475,19 +475,24 @@ export default function App() {
         </div>
       )}
 
-      {/* ANIMASI GAYA "Smooth & Minimalist Modern" (Elegan & Tenang) */}
+      {/* ANIMASI GAYA "Floating Emoji & Scale Burst" (Pop-Up Meledak Ceria) */}
       {showAnimation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm animate-fade-in p-4">
-          <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-3xl shadow-2xl text-center space-y-3 max-w-xs w-full">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-emerald-500/10 border border-emerald-500/20 overflow-hidden flex items-center justify-center text-3xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
+          <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-4 max-w-xs w-full animate-bounce">
+            <div className="relative w-20 h-20 mx-auto rounded-2xl bg-emerald-500/20 border border-emerald-500/30 overflow-hidden flex items-center justify-center text-4xl shadow-inner">
+              <span className="absolute -top-3 -right-2 text-2xl animate-ping">✨</span>
+              <span className="absolute -bottom-2 -left-2 text-2xl animate-bounce">
+                {currentPet?.species === 'Musang / Civet' ? '🍌' : '🐟'}
+              </span>
               {currentPet?.photo ? (
                 <img src={currentPet.photo} alt="Anabul" className="w-full h-full object-cover" />
               ) : (
                 <span>🐾</span>
               )}
             </div>
-            <div>
-              <h2 className="text-sm font-bold text-emerald-400">Tercatat! {currentPet?.name} Kenyang 🍽️</h2>
+            <div className="space-y-1">
+              <h2 className="text-base font-bold text-emerald-400">Nyem-nyem! {currentPet?.name} Lahap Banget 🥳</h2>
+              <p className="text-xs text-slate-300">Porsi makan berhasil dicatat & stok terupdate.</p>
             </div>
           </div>
         </div>
@@ -535,7 +540,7 @@ export default function App() {
             <span className="text-5xl block">🐾</span>
             <div className="space-y-1">
               <h2 className="text-base font-bold text-emerald-400">Belum Ada Anabul</h2>
-              <p className="text-xs text-slate-400">Silakan tambahkan profil peliharaan pertama kamu melalui tombol di atas untuk mulai melacak rutinitas harian.</p>
+              <p className="text-xs text-slate-400">Silakan tambahkan peliharaan pertama kamu melalui tombol di atas.</p>
             </div>
           </div>
         ) : (
