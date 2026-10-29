@@ -475,7 +475,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ANIMASI GAYA "Floating Emoji & Scale Burst" (Pop-Up Meledak Ceria) */}
+      {/* ANIMASI GAYA "Floating Emoji & Scale Burst" */}
       {showAnimation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-fade-in p-4">
           <div className="bg-slate-900 border border-emerald-500/40 p-6 rounded-3xl shadow-2xl text-center space-y-4 max-w-xs w-full animate-bounce">
@@ -500,12 +500,12 @@ export default function App() {
 
       <div className="max-w-md w-full space-y-6">
         
-        {/* Header atas */}
+        {/* Header atas (Revisi teks agar sesuai kenyataan PWA Tracker) */}
         <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-lg space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-extrabold text-emerald-400 tracking-wide">PawRoutine 🐾</h1>
-              <p className="text-xs text-slate-400">Multi-Pet PWA Routine & Alarm Tracker</p>
+              <p className="text-xs text-slate-400">Multi-Pet PWA Routine & Care Tracker</p>
             </div>
             <button 
               onClick={() => setShowAddPetModal(true)}
@@ -584,7 +584,7 @@ export default function App() {
                     <div className={`p-2.5 rounded-xl border transition ${feedLogs.length > 0 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-rose-500/10 border-rose-500/30 text-rose-300'}`}>
                       <span className="text-[10px] block text-slate-400">Makan Hari Ini</span>
                       <span className="font-semibold text-xs flex items-center mt-0.5">
-                        {totalMakanHariIni} Kali 🍽️
+                        {feedLogs.length} / 3 Target 🍽️
                       </span>
                     </div>
 
@@ -600,6 +600,30 @@ export default function App() {
                       <span className="font-semibold text-xs flex items-center mt-0.5">
                         {currentPet.vitaminGiven ? '✅ Selesai' : '⚠️ Belum'}
                       </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* INDIKATOR PENGINGAT 3x SEHARI */}
+                <div className="bg-slate-900 border border-slate-800/80 rounded-3xl p-4 shadow-xl space-y-2.5 backdrop-blur-sm">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-slate-400 tracking-wider uppercase">⏰ Pengingat Makan 3x Sehari</h3>
+                    <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium">
+                      Standar Perawatan
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className={`p-2.5 rounded-2xl border text-xs ${feedLogs.length >= 1 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+                      <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 1</span>
+                      <span>🌅 Pagi {feedLogs.length >= 1 ? '✅' : '⏳'}</span>
+                    </div>
+                    <div className={`p-2.5 rounded-2xl border text-xs ${feedLogs.length >= 2 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+                      <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 2</span>
+                      <span>☀️ Siang/Sore {feedLogs.length >= 2 ? '✅' : '⏳'}</span>
+                    </div>
+                    <div className={`p-2.5 rounded-2xl border text-xs ${feedLogs.length >= 3 ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 font-bold' : 'bg-slate-950/60 border-slate-800 text-slate-400'}`}>
+                      <span className="block text-[10px] text-slate-400 mb-0.5">Sesi 3</span>
+                      <span>🌙 Malam {feedLogs.length >= 3 ? '✅' : '⏳'}</span>
                     </div>
                   </div>
                 </div>
